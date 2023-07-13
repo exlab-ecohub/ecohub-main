@@ -15,11 +15,6 @@ class SecurityConfig {
     private final KeycloakLogoutHandler keycloakLogoutHandler;
     private final JwtAuthConverter jwtAuthConverter;
 
-//    @Bean
-//    protected SessionAuthenticationStrategy sessionAuthenticationStrategy() {
-//        return new RegisterSessionAuthenticationStrategy(new SessionRegistryImpl());
-//    }
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf().disable()
