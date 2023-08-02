@@ -10,7 +10,7 @@ import team.exlab.ecohub.user.model.ERole;
 
 @Component
 @RequiredArgsConstructor
-public class AdminsRegistrationOnStart implements InitializingBean {
+public class OnStartAdminsRegistrationService implements InitializingBean {
 
     private final AuthenticationController controller;
 
