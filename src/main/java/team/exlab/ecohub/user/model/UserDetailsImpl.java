@@ -1,4 +1,4 @@
-package team.exlab.ecohub.user.service;
+package team.exlab.ecohub.user.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.EqualsAndHashCode;
@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.ToString;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import team.exlab.ecohub.user.model.User;
 
 import java.util.Collection;
 import java.util.List;
@@ -15,9 +14,6 @@ import java.util.List;
 @EqualsAndHashCode
 @ToString
 public class UserDetailsImpl implements UserDetails {
-
-    private static final long serialVersionUID = 1L;
-
     private final Long id;
     private final String username;
     private final String email;

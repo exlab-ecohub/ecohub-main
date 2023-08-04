@@ -1,4 +1,4 @@
-package team.exlab.ecohub.user.configuration.jwt;
+package team.exlab.ecohub.auth.configuration.jwt;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.convert.converter.Converter;

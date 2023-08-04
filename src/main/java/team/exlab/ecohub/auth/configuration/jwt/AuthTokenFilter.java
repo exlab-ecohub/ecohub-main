@@ -1,4 +1,4 @@
-package team.exlab.ecohub.user.configuration.jwt;
+package team.exlab.ecohub.auth.configuration.jwt;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -6,8 +6,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
-import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
+import team.exlab.ecohub.token.TokenPurpose;
 import team.exlab.ecohub.user.service.UserDetailsServiceImpl;
 
 import javax.servlet.FilterChain;
@@ -20,7 +20,7 @@ import java.io.IOException;
 public class AuthTokenFilter extends OncePerRequestFilter {
 
     @Autowired
-    private JwtUtils jwtUtils;
+    private JwtService jwtService;
 
     @Autowired
     private UserDetailsServiceImpl userDetailsService;
@@ -29,9 +29,12 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         try {
-            String jwt = parseJwt(request);
-            if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
-                String username = jwtUtils.getUserNameFromJwtToken(jwt);
+            String jwt = jwtService.parseJwtFromRequest(request);
+            String tokenPurpose = jwtService.getPurposeFromJwtToken(jwt);
+
+            if (jwt != null && jwtService.validateJwtToken(jwt) &&
+                    tokenPurpose.equals(TokenPurpose.ACCESS.name())) {
+                String username = jwtService.getUserNameFromJwtToken(jwt);
 
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
@@ -43,15 +46,5 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             log.warn(e.toString());
         }
         filterChain.doFilter(request, response);
-    }
-
-    private String parseJwt(HttpServletRequest request) {
-        String headerAuth = request.getHeader("Authorization");
-
-        if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
-            return headerAuth.substring(7);
-        }
-
-        return null;
     }
 }

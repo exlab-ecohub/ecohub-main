@@ -1,4 +1,4 @@
-package team.exlab.ecohub.user.configuration.jwt;
+package team.exlab.ecohub.auth.configuration.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;

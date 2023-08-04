@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.exlab.ecohub.user.model.User;
+import team.exlab.ecohub.user.model.UserDetailsImpl;
 import team.exlab.ecohub.user.repository.UserRepository;
 
 @Service

@@ -1,6 +1,5 @@
 package team.exlab.ecohub;
 
-import lombok.Getter;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -10,8 +9,8 @@ public class EcohubApplication {
     private static String firstAdminPassword;
 
     public static void main(String[] args) {
-        superAdminPassword = args[0];
-        firstAdminPassword = args[1];
+//        superAdminPassword = args[0];
+//        firstAdminPassword = args[1];
         SpringApplication.run(EcohubApplication.class, args);
     }
 

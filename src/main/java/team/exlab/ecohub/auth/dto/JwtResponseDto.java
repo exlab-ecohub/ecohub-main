@@ -1,29 +1,25 @@
-package team.exlab.ecohub.user.dto;
+package team.exlab.ecohub.auth.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
+
 @Getter
 @Setter
+@AllArgsConstructor()
 public class JwtResponseDto {
     @JsonProperty("access_token")
     private String accessToken;
     @JsonProperty("refresh_token")
     private String refreshToken;
-    private String type = "Bearer";
+    public static final String TYPE = "Bearer";
+    @JsonIgnore
     private Long id;
     private String username;
     private String email;
     private List<String> roles;
-
-    public JwtResponseDto(String accessToken, String refreshToken, Long id, String username, String email, List<String> roles) {
-        this.accessToken = accessToken;
-        this.refreshToken = refreshToken;
-        this.id = id;
-        this.username = username;
-        this.email = email;
-        this.roles = roles;
-    }
 }

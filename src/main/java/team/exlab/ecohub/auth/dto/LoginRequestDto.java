@@ -1,4 +1,4 @@
-package team.exlab.ecohub.user.dto;
+package team.exlab.ecohub.auth.dto;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -12,5 +12,5 @@ public class LoginRequestDto {
     private String username;
     @Size(min = 10, max = 100)
     private String password;
-    private boolean isRememberMe;
+    private boolean rememberMe;
 }

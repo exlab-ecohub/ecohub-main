@@ -1,4 +1,4 @@
-package team.exlab.ecohub.user.dto;
+package team.exlab.ecohub.auth.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
