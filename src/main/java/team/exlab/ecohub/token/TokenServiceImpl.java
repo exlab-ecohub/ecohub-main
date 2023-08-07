@@ -2,6 +2,7 @@ package team.exlab.ecohub.token;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import team.exlab.ecohub.user.model.User;
 
 import java.util.List;
@@ -12,6 +13,7 @@ public class TokenServiceImpl implements TokenService {
     private final TokenRepository tokenRepository;
 
     @Override
+    @Transactional
     public void saveUserToken(User user, String jwtToken, boolean rememberMe) {
         Token token = Token.builder()
                 .user(user)
@@ -26,6 +28,7 @@ public class TokenServiceImpl implements TokenService {
     }
 
     @Override
+    @Transactional
     public void revokeAllUserTokens(User user) {
         List<Token> validUserTokens = tokenRepository.findAllValidTokenByUser(user.getId());
         if (validUserTokens.isEmpty()) {

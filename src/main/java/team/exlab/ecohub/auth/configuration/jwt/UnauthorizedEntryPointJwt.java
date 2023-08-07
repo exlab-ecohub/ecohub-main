@@ -15,11 +15,10 @@ import java.util.Map;
 
 @Component
 @Slf4j
-public class AuthEntryPointJwt implements AuthenticationEntryPoint {
-
+public class UnauthorizedEntryPointJwt implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
-                         AuthenticationException authException) throws IOException {
+                         AuthenticationException authException) {
         log.warn(String.format("Attempt of unauthenticated visit to an endpoint: %s",
                 request.getServletPath()));
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
@@ -33,7 +32,11 @@ public class AuthEntryPointJwt implements AuthenticationEntryPoint {
         response.addHeader("WWW-Authenticate", "Bearer realm=\"ecohub\"");
 
         final ObjectMapper mapper = new ObjectMapper();
-        mapper.writeValue(response.getOutputStream(), body);
+        try {
+            mapper.writeValue(response.getOutputStream(), body);
+        } catch (IOException e) {
+            log.warn("Error while writing response unauthorized status", e);
+        }
     }
 
 }

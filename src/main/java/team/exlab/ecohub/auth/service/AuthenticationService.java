@@ -10,7 +10,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import team.exlab.ecohub.auth.configuration.jwt.JwtService;
@@ -19,13 +18,11 @@ import team.exlab.ecohub.auth.dto.LoginRequestDto;
 import team.exlab.ecohub.auth.dto.MessageResponseDto;
 import team.exlab.ecohub.auth.dto.SignupRequestDto;
 import team.exlab.ecohub.exception.UserNotFoundException;
-import team.exlab.ecohub.token.TokenPurpose;
 import team.exlab.ecohub.token.TokenRepository;
 import team.exlab.ecohub.token.TokenService;
 import team.exlab.ecohub.user.model.ERole;
 import team.exlab.ecohub.user.model.Role;
 import team.exlab.ecohub.user.model.User;
-import team.exlab.ecohub.user.model.UserDetailsImpl;
 import team.exlab.ecohub.user.repository.RoleRepository;
 import team.exlab.ecohub.user.repository.UserRepository;
 
@@ -43,7 +40,6 @@ public class AuthenticationService {
     private final JwtService jwtService;
 
     private final TokenService tokenService;
-    private final UserDetailsService userDetailsService;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final TokenRepository tokenRepository;
@@ -64,16 +60,16 @@ public class AuthenticationService {
         tokenService.revokeAllUserTokens(currentUser);
         tokenService.saveUserToken(currentUser, refreshToken, loginRequestDto.isRememberMe());
 
-        UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
-        List<String> roles = userDetails.getAuthorities().stream()
+        User user = (User) auth.getPrincipal();
+        List<String> roles = user.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(new JwtResponseDto(accessToken,
                 refreshToken,
-                userDetails.getId(),
-                userDetails.getUsername(),
-                userDetails.getEmail(),
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
                 roles));
     }
 
@@ -129,32 +125,30 @@ public class AuthenticationService {
 
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = jwtService.parseJwtFromRequest(request);
-        String tokenPurpose = jwtService.getPurposeFromJwtToken(refreshToken);
 
         if (tokenRepository.findByRefreshToken(refreshToken).isPresent() &&
-                tokenPurpose.equals(TokenPurpose.REFRESH.name())) {
+                jwtService.validateRefreshToken(refreshToken)) {
 
             String username = jwtService.getUserNameFromJwtToken(refreshToken);
             User user = userRepository.findUserByUsername(username)
                     .orElseThrow(() -> new UserNotFoundException(String.format("User with username %s not found", username)));
-            UserDetailsImpl userDetails = (UserDetailsImpl) userDetailsService.loadUserByUsername(username);
 
-            String accessToken = jwtService.generateAccessToken(userDetails);
-            refreshToken = jwtService.generateRefreshToken(userDetails, jwtService.getRememberMeFromJwtToken(refreshToken));
+            String accessToken = jwtService.generateAccessToken(user);
+            refreshToken = jwtService.generateRefreshToken(user, jwtService.getRememberMeFromJwtToken(refreshToken));
 
             tokenService.revokeAllUserTokens(user);
             tokenService.saveUserToken(user, refreshToken, jwtService.getRememberMeFromJwtToken(refreshToken));
 
-            List<String> roles = userDetails.getAuthorities().stream()
+            List<String> roles = user.getAuthorities().stream()
                     .map(GrantedAuthority::getAuthority)
                     .collect(Collectors.toList());
 
             try {
                 new ObjectMapper().writeValue(response.getOutputStream(), new JwtResponseDto(accessToken,
                         refreshToken,
-                        userDetails.getId(),
-                        userDetails.getUsername(),
-                        userDetails.getEmail(),
+                        user.getId(),
+                        user.getUsername(),
+                        user.getEmail(),
                         roles));
             } catch (IOException e) {
                 log.warn("Error while writing response with new tokens", e);

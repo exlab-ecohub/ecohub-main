@@ -12,11 +12,11 @@ import java.util.List;
 @Setter
 @AllArgsConstructor()
 public class JwtResponseDto {
+    public static final String TYPE = "Bearer";
     @JsonProperty("access_token")
     private String accessToken;
     @JsonProperty("refresh_token")
     private String refreshToken;
-    public static final String TYPE = "Bearer";
     @JsonIgnore
     private Long id;
     private String username;

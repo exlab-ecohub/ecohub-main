@@ -8,13 +8,15 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import team.exlab.ecohub.auth.configuration.jwt.AuthEntryPointJwt;
+import org.springframework.security.web.authentication.logout.LogoutHandler;
 import team.exlab.ecohub.auth.configuration.jwt.AuthTokenFilter;
+import team.exlab.ecohub.auth.configuration.jwt.UnauthorizedEntryPointJwt;
 
 @Configuration
 @EnableWebSecurity
@@ -22,7 +24,8 @@ import team.exlab.ecohub.auth.configuration.jwt.AuthTokenFilter;
 @RequiredArgsConstructor
 public class WebSecurityConfig {
 
-    private final AuthEntryPointJwt unauthorizedHandler;
+    private final UnauthorizedEntryPointJwt unauthorizedHandler;
+    private final LogoutHandler logoutHandler;
 
     @Bean
     public AuthTokenFilter authenticationJwtTokenFilter() {
@@ -59,6 +62,10 @@ public class WebSecurityConfig {
                 .anyRequest()
                 .permitAll();
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.logout()
+                .logoutUrl("/auth/logout")
+                .addLogoutHandler(logoutHandler)
+                .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext());
         return http.build();
     }
 }

@@ -1,21 +1,22 @@
 package team.exlab.ecohub.user.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import team.exlab.ecohub.auth.AuthUtils;
-import team.exlab.ecohub.user.UserMapper;
-import team.exlab.ecohub.user.dto.UserDto;
-import team.exlab.ecohub.user.model.User;
+import org.springframework.transaction.annotation.Transactional;
 import team.exlab.ecohub.user.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService, UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
-    public UserDto getCurrentUser() {
-        User user = userRepository.findById(AuthUtils.getCurrentUserId()).orElseThrow();
-        return UserMapper.toUserDto(user);
+    @Transactional
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return userRepository.findUserByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException(String.format("User with username %s not found", username)));
     }
 }

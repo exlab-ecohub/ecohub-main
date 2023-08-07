@@ -7,8 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
-import team.exlab.ecohub.token.TokenPurpose;
-import team.exlab.ecohub.user.service.UserDetailsServiceImpl;
+import team.exlab.ecohub.user.service.UserServiceImpl;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -18,32 +17,28 @@ import java.io.IOException;
 
 @Slf4j
 public class AuthTokenFilter extends OncePerRequestFilter {
-
     @Autowired
     private JwtService jwtService;
-
     @Autowired
-    private UserDetailsServiceImpl userDetailsService;
+    private UserServiceImpl userService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         try {
             String jwt = jwtService.parseJwtFromRequest(request);
-            String tokenPurpose = jwtService.getPurposeFromJwtToken(jwt);
 
-            if (jwt != null && jwtService.validateJwtToken(jwt) &&
-                    tokenPurpose.equals(TokenPurpose.ACCESS.name())) {
+            if (jwt != null && jwtService.validateAccessToken(jwt)) {
                 String username = jwtService.getUserNameFromJwtToken(jwt);
 
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                UserDetails userDetails = userService.loadUserByUsername(username);
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
             }
         } catch (Exception e) {
-            log.warn(e.toString());
+            log.warn("Exception in authorization token filter", e);
         }
         filterChain.doFilter(request, response);
     }
