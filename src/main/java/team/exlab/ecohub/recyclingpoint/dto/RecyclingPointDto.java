@@ -27,11 +27,14 @@ public class RecyclingPointDto {
     @NotBlank
     @Size(min = 3, max = 100, message = "Address must be between 3 and 100 characters long")
     private String address;
+    @Size(min = 4, max = 100, message = "Phone number must be between 4 and 100 characters long")
     private String phoneNumber;
+    @Size(min = 4, max = 100, message = "Website must be between 4 and 100 characters long")
     private String website;
     @NotNull(message = "GPS coordinates required")
     private Location location;
     private Map<DayOfWeek, WorkingHours> workingHours;
     @NotEmpty(message = "At least one recyclable type required")
     private Set<String> recyclableTypes;
+    private boolean displayed;
 }

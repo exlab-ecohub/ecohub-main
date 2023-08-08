@@ -26,30 +26,30 @@ public class RecyclingPointServiceImpl implements RecyclingPointService {
 
     @Override
     @Transactional
-    public List<RecyclingPointPartInfoDto> getPoints(Set<String> types, Integer from, Integer size) {
+    public List<RecyclingPointPartInfoDto> getPoints(Set<String> types, String displayed, Integer from, Integer size) {
+        List<RecyclingPoint> recyclingPoints;
+        size = size == 0 ? (int) pointRepository.count() - from : size;
         if (types == null || types.isEmpty()) {
-            if (size == 0) {
-                return pointRepository.findAll().stream()
-                        .map(RecyclingPointMapper::toPartInfoDto)
-                        .collect(Collectors.toList());
+            if (displayed.equals("null")) {
+                recyclingPoints = pointRepository.findAllByOrderById(OffsetLimitPageable.of(from, size));
             } else {
-                return pointRepository.findAll(OffsetLimitPageable.of(from, size)).stream()
-                        .map(RecyclingPointMapper::toPartInfoDto)
-                        .collect(Collectors.toList());
+                recyclingPoints = pointRepository.findAllByDisplayedOrderById(Boolean.parseBoolean(displayed), OffsetLimitPageable.of(from, size));
+            }
+        } else {
+            Set<RecyclableType> recyclableTypes = new HashSet<>();
+            types.forEach(type -> recyclableTypes.add(typeRepository.findByName(ERecyclableType.valueOf(type))));
+            if (displayed.equals("null")) {
+                recyclingPoints = pointRepository.findAllDistinctByRecyclableTypesInOrderById(recyclableTypes,
+                        OffsetLimitPageable.of(from, size));
+            } else {
+                recyclingPoints = pointRepository.findAllDistinctByDisplayedAndRecyclableTypesInOrderById(Boolean.parseBoolean(displayed),
+                        recyclableTypes,
+                        OffsetLimitPageable.of(from, size));
             }
         }
-        Set<RecyclableType> recyclableTypes = new HashSet<>();
-        types.forEach(type -> recyclableTypes.add(typeRepository.findByName(ERecyclableType.valueOf(type))));
-        if (size == 0) {
-            return pointRepository.findAllDistinctByRecyclableTypesIn(recyclableTypes).stream()
-                    .map(RecyclingPointMapper::toPartInfoDto)
-                    .collect(Collectors.toList());
-        } else {
-            return pointRepository.findAllDistinctByRecyclableTypesIn(recyclableTypes,
-                            OffsetLimitPageable.of(from, size)).stream()
-                    .map(RecyclingPointMapper::toPartInfoDto)
-                    .collect(Collectors.toList());
-        }
+        return recyclingPoints.stream()
+                .map(RecyclingPointMapper::toPartInfoDto)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -84,6 +84,7 @@ public class RecyclingPointServiceImpl implements RecyclingPointService {
                         .map(type -> typeRepository.findByName(ERecyclableType.valueOf(type)))
                         .collect(Collectors.toSet())
         );
+        recyclingPoint.setDisplayed(updatedPoint.isDisplayed());
         return RecyclingPointMapper.toDto(pointRepository.save(recyclingPoint));
     }
 

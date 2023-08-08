@@ -11,7 +11,9 @@ import java.util.Set;
 
 @Repository
 public interface RecyclingPointRepository extends JpaRepository<RecyclingPoint, Long> {
-    List<RecyclingPoint> findAllDistinctByRecyclableTypesIn(Set<RecyclableType> types);
 
-    List<RecyclingPoint> findAllDistinctByRecyclableTypesIn(Set<RecyclableType> types, Pageable pageable);
+    List<RecyclingPoint> findAllDistinctByRecyclableTypesInOrderById(Set<RecyclableType> types, Pageable pageable);
+    List<RecyclingPoint> findAllDistinctByDisplayedAndRecyclableTypesInOrderById(boolean displayed, Set<RecyclableType> types, Pageable pageable);
+    List<RecyclingPoint> findAllByOrderById(Pageable pageable);
+    List<RecyclingPoint> findAllByDisplayedOrderById(boolean displayed, Pageable pageable);
 }

@@ -15,4 +15,5 @@ public class RecyclingPointPartInfoDto {
     private String address;
     private String phoneNumber;
     private String website;
+    private boolean displayed;
 }

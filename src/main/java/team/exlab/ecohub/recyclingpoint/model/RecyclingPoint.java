@@ -40,4 +40,5 @@ public class RecyclingPoint {
             joinColumns = {@JoinColumn(name = "recycling_point_id")},
             inverseJoinColumns = {@JoinColumn(name = "recyclable_type_id")})
     private Set<RecyclableType> recyclableTypes;
+    private boolean displayed;
 }

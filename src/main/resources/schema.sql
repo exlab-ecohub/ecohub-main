@@ -44,7 +44,8 @@ CREATE TABLE RECYCLING_POINTS
     phone_number varchar(30),
     website      varchar(100),
     latitude     numeric,
-    longitude    numeric
+    longitude    numeric,
+    displayed    boolean
 );
 
 CREATE TABLE WORKING_HOURS
