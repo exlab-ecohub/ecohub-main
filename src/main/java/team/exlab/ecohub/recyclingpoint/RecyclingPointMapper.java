@@ -9,13 +9,17 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class RecyclingPointMapper {
+    private RecyclingPointMapper() {
+    }
+
     public static RecyclingPointPartInfoDto toPartInfoDto(RecyclingPoint recyclingPoint) {
         return RecyclingPointPartInfoDto.builder()
                 .id(recyclingPoint.getId())
                 .name(recyclingPoint.getName())
                 .address(recyclingPoint.getAddress())
                 .phoneNumber(recyclingPoint.getPhoneNumber())
-                .website(recyclingPoint.getWebsite()).build();
+                .website(recyclingPoint.getWebsite())
+                .displayed(recyclingPoint.isDisplayed()).build();
     }
 
     public static RecyclingPointDto toDto(RecyclingPoint recyclingPoint) {
@@ -29,7 +33,8 @@ public class RecyclingPointMapper {
                 .workingHours(recyclingPoint.getWorkingHours())
                 .recyclableTypes(recyclingPoint.getRecyclableTypes().stream()
                         .map(type -> type.getName().name())
-                        .collect(Collectors.toSet())).build();
+                        .collect(Collectors.toSet()))
+                .displayed(recyclingPoint.isDisplayed()).build();
     }
 
     public static RecyclingPoint toPoint(RecyclingPointDto recyclingPointDto,
@@ -42,6 +47,7 @@ public class RecyclingPointMapper {
                 .website(recyclingPointDto.getWebsite())
                 .location(recyclingPointDto.getLocation())
                 .workingHours(recyclingPointDto.getWorkingHours())
-                .recyclableTypes(recyclableTypes).build();
+                .recyclableTypes(recyclableTypes)
+                .displayed(recyclingPointDto.isDisplayed()).build();
     }
 }

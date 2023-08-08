@@ -17,9 +17,10 @@ public class RecyclingPointController {
 
     @GetMapping
     public List<RecyclingPointPartInfoDto> getPoints(@RequestParam(required = false) Set<String> types,
+                                                     @RequestParam(required = false, defaultValue = "null") String displayed,
                                                      @RequestParam(required = false, defaultValue = "0") Integer from,
                                                      @RequestParam(required = false, defaultValue = "0") Integer size) {
-        return recyclingPointService.getPoints(types, from, size);
+        return recyclingPointService.getPoints(types, displayed, from, size);
     }
 
     @GetMapping("/{pointId}")

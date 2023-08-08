@@ -8,6 +8,7 @@ import java.util.Set;
 
 public interface RecyclingPointService {
     List<RecyclingPointPartInfoDto> getPoints(Set<String> types,
+                                              String displayed,
                                               Integer from,
                                               Integer size);
 
