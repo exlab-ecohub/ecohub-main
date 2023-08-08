@@ -11,7 +11,6 @@ import java.util.Set;
 
 @Repository
 public interface RecyclingPointRepository extends JpaRepository<RecyclingPoint, Long> {
-    //todo На данный момент сделано как на сайте: выдача пунктов, содержащих ХОТЯ БЫ один из запрошенных типов
     List<RecyclingPoint> findAllDistinctByRecyclableTypesIn(Set<RecyclableType> types);
 
     List<RecyclingPoint> findAllDistinctByRecyclableTypesIn(Set<RecyclableType> types, Pageable pageable);

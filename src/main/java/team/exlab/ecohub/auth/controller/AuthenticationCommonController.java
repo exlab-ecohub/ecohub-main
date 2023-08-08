@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import team.exlab.ecohub.auth.dto.JwtResponseDto;
 import team.exlab.ecohub.auth.dto.LoginRequestDto;
 import team.exlab.ecohub.auth.dto.MessageResponseDto;
-import team.exlab.ecohub.auth.dto.SignupRequestDto;
+import team.exlab.ecohub.auth.dto.SignupUserRequestDto;
 import team.exlab.ecohub.auth.service.AuthenticationService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -20,7 +20,7 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
-public class AuthenticationController {
+public class AuthenticationCommonController {
     private final AuthenticationService authenticationService;
 
 
@@ -30,8 +30,8 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<MessageResponseDto> registerUser(@Valid @RequestBody SignupRequestDto signupRequestDto) {
-        return authenticationService.registerUser(signupRequestDto);
+    public ResponseEntity<MessageResponseDto> registerUser(@Valid @RequestBody SignupUserRequestDto signupUserRequestDto) {
+        return authenticationService.registerUser(signupUserRequestDto);
     }
 
     @PostMapping("/refresh-token")

@@ -8,12 +8,11 @@ import javax.validation.constraints.Size;
 
 @Getter
 @Setter
-public class LoginRequestDto {
+public class SignupAdminRequestDto {
     @NotNull
     @Size(min = 5, max = 100)
-    private String usernameOrEmail;
+    private String username;
     @NotNull
     @Size(min = 10, max = 100)
     private String password;
-    private boolean rememberMe;
 }

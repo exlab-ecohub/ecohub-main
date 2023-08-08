@@ -7,16 +7,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import team.exlab.ecohub.auth.configuration.jwt.JwtService;
-import team.exlab.ecohub.auth.dto.JwtResponseDto;
-import team.exlab.ecohub.auth.dto.LoginRequestDto;
-import team.exlab.ecohub.auth.dto.MessageResponseDto;
-import team.exlab.ecohub.auth.dto.SignupRequestDto;
+import team.exlab.ecohub.auth.dto.*;
 import team.exlab.ecohub.exception.UserNotFoundException;
 import team.exlab.ecohub.token.TokenRepository;
 import team.exlab.ecohub.token.TokenService;
@@ -29,8 +26,6 @@ import team.exlab.ecohub.user.repository.UserRepository;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -41,6 +36,7 @@ public class AuthenticationService {
 
     private final TokenService tokenService;
     private final UserRepository userRepository;
+    private final UserDetailsService userService;
     private final RoleRepository roleRepository;
     private final TokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
@@ -49,10 +45,9 @@ public class AuthenticationService {
     public ResponseEntity<JwtResponseDto> authenticateUser(LoginRequestDto loginRequestDto) {
         Authentication auth = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(
-                        loginRequestDto.getUsername(),
+                        loginRequestDto.getUsernameOrEmail(),
                         loginRequestDto.getPassword()));
-        User currentUser = userRepository.findUserByUsername(loginRequestDto.getUsername()).orElseThrow();
-
+        User currentUser = (User) userService.loadUserByUsername(loginRequestDto.getUsernameOrEmail());
         SecurityContextHolder.getContext().setAuthentication(auth);
 
         String accessToken = jwtService.generateAccessToken((UserDetails) auth.getPrincipal());
@@ -61,61 +56,35 @@ public class AuthenticationService {
         tokenService.saveUserToken(currentUser, refreshToken, loginRequestDto.isRememberMe());
 
         User user = (User) auth.getPrincipal();
-        List<String> roles = user.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
 
         return ResponseEntity.ok(new JwtResponseDto(accessToken,
                 refreshToken,
-                user.getId(),
                 user.getUsername(),
-                user.getEmail(),
-                roles));
+                user.getEmail()));
     }
 
-    public ResponseEntity<MessageResponseDto> registerUser(SignupRequestDto signupRequestDto) {
-        if (userRepository.existsByUsername(signupRequestDto.getUsername())) {
+    public ResponseEntity<MessageResponseDto> registerUser(SignupUserRequestDto signupUserRequestDto) {
+        if (userRepository.existsByUsername(signupUserRequestDto.getUsername())) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponseDto("Error: Username exists"));
         }
 
-        if (signupRequestDto.getEmail() != null && userRepository.existsByEmail(signupRequestDto.getEmail())) {
+        if (userRepository.existsByEmail(signupUserRequestDto.getEmail())) {
             return ResponseEntity
                     .badRequest()
                     .body(new MessageResponseDto("Error: Email exists"));
         }
 
-        User user = new User(signupRequestDto.getUsername(),
-                passwordEncoder.encode(signupRequestDto.getPassword()),
-                signupRequestDto.getEmail()
+        User user = new User(signupUserRequestDto.getUsername(),
+                passwordEncoder.encode(signupUserRequestDto.getPassword()),
+                signupUserRequestDto.getEmail()
         );
 
-        ERole reqRole = signupRequestDto.getRole();
-        Role role;
+        Role role = roleRepository
+                .findRoleByName(ERole.ROLE_USER)
+                .orElseThrow(() -> new RuntimeException("Error, Role USER is not found"));
 
-        if (reqRole == null) {
-            role = roleRepository
-                    .findRoleByName(ERole.ROLE_USER)
-                    .orElseThrow(() -> new RuntimeException("Error, Role USER is not found"));
-        } else {
-            switch (reqRole) {
-                case ROLE_SUPERADMIN:
-                    role = roleRepository
-                            .findRoleByName(ERole.ROLE_SUPERADMIN)
-                            .orElseThrow(() -> new RuntimeException("Error, Role ADMIN is not found"));
-                    break;
-                case ROLE_ADMIN:
-                    role = roleRepository
-                            .findRoleByName(ERole.ROLE_ADMIN)
-                            .orElseThrow(() -> new RuntimeException("Error, Role ADMIN is not found"));
-                    break;
-                default:
-                    role = roleRepository
-                            .findRoleByName(ERole.ROLE_USER)
-                            .orElseThrow(() -> new RuntimeException("Error, Role USER is not found"));
-            }
-        }
         user.setRole(role);
         userRepository.save(user);
         return ResponseEntity.ok(
@@ -139,21 +108,38 @@ public class AuthenticationService {
             tokenService.revokeAllUserTokens(user);
             tokenService.saveUserToken(user, refreshToken, jwtService.getRememberMeFromJwtToken(refreshToken));
 
-            List<String> roles = user.getAuthorities().stream()
-                    .map(GrantedAuthority::getAuthority)
-                    .collect(Collectors.toList());
-
             try {
                 new ObjectMapper().writeValue(response.getOutputStream(), new JwtResponseDto(accessToken,
                         refreshToken,
-                        user.getId(),
                         user.getUsername(),
-                        user.getEmail(),
-                        roles));
+                        user.getEmail()));
             } catch (IOException e) {
                 log.warn("Error while writing response with new tokens", e);
             }
         }
         response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+    }
+
+    public ResponseEntity<MessageResponseDto> registerAdmin(SignupAdminRequestDto signupAdminRequestDto) {
+        if (userRepository.existsByUsername(signupAdminRequestDto.getUsername())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new MessageResponseDto("Error: Username exists"));
+        }
+
+        User admin = new User(signupAdminRequestDto.getUsername(),
+                passwordEncoder.encode(signupAdminRequestDto.getPassword()),
+                null
+        );
+
+        Role role = roleRepository
+                .findRoleByName(ERole.ROLE_ADMIN)
+                .orElseThrow(() -> new RuntimeException("Error, Role USER is not found"));
+
+        admin.setRole(role);
+        userRepository.save(admin);
+        return ResponseEntity.ok(
+                new MessageResponseDto(
+                        String.format("Admin %s successfully created", admin.getUsername())));
     }
 }
