@@ -1,0 +1,24 @@
+version: '3.8'
+services:
+  ecohub-service:
+    build: ./
+    container_name: ecohub-service
+    ports:
+      - "8081:8081"
+    depends_on:
+      - recycling-points-db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://recycling-points-db:5432/ecohub
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+
+
+  recycling-points-db:
+    image: postgres:13.7-alpine
+    container_name: recycling-points-db
+    ports:
+      - "6541:5432"
+    environment:
+      - POSTGRES_DB=ecohub
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
