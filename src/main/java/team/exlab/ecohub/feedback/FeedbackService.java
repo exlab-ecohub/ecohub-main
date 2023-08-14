@@ -6,7 +6,7 @@ import team.exlab.ecohub.feedback.dto.FeedbackUserDto;
 import java.util.List;
 
 public interface FeedbackService {
-    FeedbackAdminDto createFeedback(FeedbackUserDto userFeedback);
+    FeedbackUserDto createFeedback(FeedbackUserDto userFeedback);
 
     FeedbackAdminDto createResponseToFeedback(FeedbackAdminDto feedbackAdminDto);
     List<FeedbackAdminDto> getFeedbacks(ResponseStatus responseStatus);

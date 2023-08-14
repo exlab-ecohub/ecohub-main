@@ -1,5 +1,6 @@
 package team.exlab.ecohub.feedback;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.exlab.ecohub.feedback.dto.FeedbackAdminDto;
@@ -11,25 +12,21 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class FeedbackServiceImpl implements FeedbackService {
     private final FeedbackRepository repository;
 
-    public FeedbackServiceImpl(FeedbackRepository repository) {
-        this.repository = repository;
-    }
-
-
     @Override
     @Transactional
-    public FeedbackAdminDto createFeedback(FeedbackUserDto userFeedback) {
+    public FeedbackUserDto createFeedback(FeedbackUserDto userFeedback) {
         Feedback feedbackToSave = FeedbackUserMapper.toFeedback(userFeedback);
-        feedbackToSave.setResponse_status(ResponseStatus.OPEN);
-        return FeedbackAdminMapper.toDto(repository.save(feedbackToSave));
+        feedbackToSave.setResponseStatus(ResponseStatus.OPEN);
+        return FeedbackUserMapper.toDto(repository.save(feedbackToSave));
     }
 
     @Override
     public FeedbackAdminDto createResponseToFeedback(FeedbackAdminDto feedbackAdminDto) {
-        String response = feedbackAdminDto.getMessage_content();
+        StringBuilder response = feedbackAdminDto.getMessage_content();
         return addResponseToMessage(feedbackAdminDto, response);
     }
 
@@ -48,13 +45,13 @@ public class FeedbackServiceImpl implements FeedbackService {
         return null;
     }
 
-    public FeedbackAdminDto addResponseToMessage(FeedbackAdminDto feedbackAdminDto, String response) {
+    public FeedbackAdminDto addResponseToMessage(FeedbackAdminDto feedbackAdminDto, StringBuilder response) {
         Long feedback_id = feedbackAdminDto.getFeedback_id();
         Feedback feedbackToAlter = repository.findById(feedback_id).orElseThrow(() -> new FeedbackNotFoundException(feedback_id));
-        StringBuilder sb = new StringBuilder(feedbackToAlter.getMessage_content());
+        StringBuilder sb = new StringBuilder(feedbackToAlter.getMessageContent());
         sb.append("\n\n\n").append(LocalDateTime.now()).append("\n").append(response);
-        feedbackToAlter.setResponse_status(ResponseStatus.IN_PROGRESS);
-        feedbackToAlter.setMessage_content(sb);
+        feedbackToAlter.setResponseStatus(ResponseStatus.IN_PROGRESS);
+        feedbackToAlter.setMessageContent(sb);
         return FeedbackAdminMapper.toDto(feedbackToAlter);
     }
 }

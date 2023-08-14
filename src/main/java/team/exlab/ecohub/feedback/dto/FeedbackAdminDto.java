@@ -12,7 +12,7 @@ public class FeedbackAdminDto {
     private Long feedback_id;
     private String email;
     private String message_topic;
-    private String message_content;
+    private StringBuilder message_content;
     private LocalDateTime message_time;
     private StringBuilder response_content;
     private LocalDateTime response_time;

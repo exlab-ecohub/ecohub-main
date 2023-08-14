@@ -7,27 +7,25 @@ import team.exlab.ecohub.feedback.Feedback;
 public class FeedbackAdminMapper {
     public static FeedbackAdminDto toDto(Feedback feedback) {
         return FeedbackAdminDto.builder().
-                feedback_id(feedback.getFeedback_id()).
+                feedback_id(feedback.getFeedbackId()).
                 email(feedback.getEmail()).
-                message_topic(feedback.getMessage_topic()).
-                message_content(feedback.getMessage_content()).
-                message_time(feedback.getMessage_time()).
-                response_content(feedback.getResponse_content()).
-                response_time(feedback.getResponse_time()).
-                response_status(feedback.getResponse_status()).
+                message_topic(feedback.getMessageTopic()).
+                message_content(feedback.getMessageContent()).
+                message_time(feedback.getMessageTime()).
+                response_content(feedback.getResponseContent()).
+                response_time(feedback.getResponseTime()).
+                response_status(feedback.getResponseStatus()).
                 build();
     }
 
     public static Feedback toFeedback(FeedbackAdminDto feedbackAdminDto) {
         return Feedback.builder().
-                feedback_id(feedbackAdminDto.getFeedback_id()).
-                email(feedbackAdminDto.getEmail()).
-                message_topic(feedbackAdminDto.getMessage_topic()).
-                message_content(feedbackAdminDto.getMessage_content()).
-                message_time(feedbackAdminDto.getMessage_time()).
-                response_content(feedbackAdminDto.getResponse_content()).
-                response_time(feedbackAdminDto.getResponse_time()).
-                response_status(feedbackAdminDto.getResponse_status()).
+                feedbackId(feedbackAdminDto.getFeedback_id()).
+                email(feedbackAdminDto.getEmail()).messageTopic(feedbackAdminDto.getMessage_topic()).messageContent(feedbackAdminDto.getMessage_content()).
+                messageTime(feedbackAdminDto.getMessage_time()).
+                responseContent(feedbackAdminDto.getResponse_content()).
+                responseTime(feedbackAdminDto.getResponse_time()).
+                responseStatus(feedbackAdminDto.getResponse_status()).
                 build();
     }
 }

@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Builder
 public class FeedbackUserDto {
     private String message_topic;
-    private String message_content;
+    private StringBuilder message_content;
     private LocalDateTime message_time;
     private StringBuilder response_content;
     private ResponseStatus response_status;

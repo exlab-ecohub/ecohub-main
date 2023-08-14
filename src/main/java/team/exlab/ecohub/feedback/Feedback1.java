@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Table(name = "feedbacks")
 @Builder
-public class Feedback {
+public class Feedback1 {
     @Id
     @GeneratedValue
     @Column(name = "feedback_id")
@@ -23,13 +23,13 @@ public class Feedback {
     @Column(name = "message_topic")
     private String messageTopic;
     @Column(name = "message_content")
-    private StringBuilder messageContent;
+    private String messageContent;
     @Column(name = "message_time")
     private LocalDateTime messageTime;
     @Column(name = "admin_id")
     private Long adminId;
     @Column(name = "response_content")
-    private StringBuilder responseContent;
+    private String responseContent;
     @Column(name = "response_time")
     private LocalDateTime responseTime;
     @Column(name = "response_status")

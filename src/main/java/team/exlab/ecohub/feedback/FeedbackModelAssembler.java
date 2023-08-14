@@ -13,7 +13,7 @@ public class FeedbackModelAssembler implements RepresentationModelAssembler<Feed
     @Override
     public EntityModel<Feedback> toModel(Feedback entity) {
         return EntityModel.of(entity,
-                linkTo(methodOn(AdminFeedbackController.class).getFeedbackById(entity.getFeedback_id())).withSelfRel(),
+                linkTo(methodOn(AdminFeedbackController.class).getFeedbackById(entity.getFeedbackId())).withSelfRel(),
                 linkTo(methodOn(AdminFeedbackController.class).getAllMessages()).withRel("messages"));
     }
 }
