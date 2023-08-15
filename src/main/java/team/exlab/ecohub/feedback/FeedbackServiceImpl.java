@@ -26,7 +26,7 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     @Override
     public FeedbackAdminDto createResponseToFeedback(FeedbackAdminDto feedbackAdminDto) {
-        StringBuilder response = feedbackAdminDto.getMessage_content();
+        StringBuilder response = feedbackAdminDto.getMessageContent();
         return addResponseToMessage(feedbackAdminDto, response);
     }
 
@@ -46,7 +46,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     }
 
     public FeedbackAdminDto addResponseToMessage(FeedbackAdminDto feedbackAdminDto, StringBuilder response) {
-        Long feedback_id = feedbackAdminDto.getFeedback_id();
+        Long feedback_id = feedbackAdminDto.getFeedbackId();
         Feedback feedbackToAlter = repository.findById(feedback_id).orElseThrow(() -> new FeedbackNotFoundException(feedback_id));
         StringBuilder sb = new StringBuilder(feedbackToAlter.getMessageContent());
         sb.append("\n\n\n").append(LocalDateTime.now()).append("\n").append(response);

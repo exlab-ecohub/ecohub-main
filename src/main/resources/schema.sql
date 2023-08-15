@@ -37,37 +37,45 @@ CREATE TABLE TOKENS
     user_id       bigint REFERENCES USERS (id) ON DELETE CASCADE      NOT NULL
 );
 
+DROP TYPE IF EXISTS response_status_enum CASCADE;
+CREATE TYPE response_status_enum AS ENUM (
+    'OPEN',
+    'IN_PROGRESS',
+    'CLOSED'
+    );
+
 CREATE TABLE IF NOT EXISTS FEEDBACKS
 (
     feedback_id serial NOT NULL,
     email character varying,
     message_topic character varying,
     message_content text,
-    message_time time without time zone,
-    admin_id integer,
+    message_time timestamp,
+    admin_id bigint,
     response_content text,
-    response_time time without time zone,
+    response_time timestamp,
     response_status character varying,
     PRIMARY KEY (feedback_id)
 );
+
 insert into FEEDBACKS (email, message_topic, message_content, message_time, admin_id, response_content, response_time, response_status)
     VALUES ('pavel11sg@gmail.com',
             'некорректные данные по точке переработки',
             'Добрый день! Исправьте пожалуйста контактные данные по пункту переработки по адресу ул.Слободская.',
-            '03-08-2023 20:00',
+            '2023-08-14 21:30',
             1,
             'Здравствуйте, спасибо что сообщили, в ближайшее време уточним и исправим!',
-            '03-08-2023 21:00',
-            'closed');
+            '2023-08-15 09:00',
+            'OPEN');
 insert into FEEDBACKS (email, message_topic, message_content, message_time, admin_id, response_content, response_time, response_status)
 VALUES ('alexyatsenko@gmail.com',
         'test',
         'Проверка работы',
-        '03-08-2023 20:30',
+        '2023-08-15 20:25',
         1,
         'Ответ',
-        '03-08-2023 22:00',
-        'closed');
+        '2023-08-16 10:00',
+        'CLOSED');
 
 CREATE TABLE IF NOT EXISTS FEEDBACKS_USERS
 (

@@ -1,24 +1,25 @@
 package team.exlab.ecohub.feedback;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "feedbacks")
 @Builder
 public class Feedback {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "feedback_id")
     private Long feedbackId;
+    @Column(name = "email")
     private String email;
     @Column(name = "message_topic")
     private String messageTopic;

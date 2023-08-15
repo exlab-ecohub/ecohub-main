@@ -7,21 +7,23 @@ import team.exlab.ecohub.feedback.Feedback;
 public class FeedbackUserMapper {
     public static FeedbackUserDto toDto(Feedback feedback) {
         return FeedbackUserDto.builder().
-                message_topic(feedback.getMessageTopic()).
-                message_content(feedback.getMessageContent()).
-                message_time(feedback.getMessageTime()).
-                response_content(feedback.getResponseContent()).
-                response_time(feedback.getResponseTime()).
-                response_status(feedback.getResponseStatus()).
+                messageTopic(feedback.getMessageTopic()).
+                messageContent(feedback.getMessageContent()).
+                messageTime(feedback.getMessageTime()).
+                responseContent(feedback.getResponseContent()).
+                responseTime(feedback.getResponseTime()).
+                responseStatus(feedback.getResponseStatus()).
                 build();
     }
 
     public static Feedback toFeedback(FeedbackUserDto feedbackUserDto) {
-        return Feedback.builder().messageTopic(feedbackUserDto.getMessage_topic()).messageContent(feedbackUserDto.getMessage_content()).
-                messageTime(feedbackUserDto.getMessage_time()).
-                responseContent(feedbackUserDto.getResponse_content()).
-                responseTime(feedbackUserDto.getResponse_time()).
-                responseStatus(feedbackUserDto.getResponse_status()).
+        return Feedback.builder().
+                messageTopic(feedbackUserDto.getMessageTopic()).
+                messageContent(feedbackUserDto.getMessageContent()).
+                messageTime(feedbackUserDto.getMessageTime()).
+                responseContent(feedbackUserDto.getResponseContent()).
+                responseTime(feedbackUserDto.getResponseTime()).
+                responseStatus(feedbackUserDto.getResponseStatus()).
                 build();
     }
 }
