@@ -6,16 +6,20 @@ services:
     ports:
       - "8081:8081"
     depends_on:
-      - recycling-points-db
+      - ecohub-db
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://recycling-points-db:5432/ecohub
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://ecohub-db:5432/ecohub
       - POSTGRES_USER=root
       - POSTGRES_PASSWORD=root
+      - SUPERADMIN_LOGIN=superadmin
+      - SUPERADMIN_PASSWORD=superadmin
+      - FIRSTADMIN_LOGIN=admin
+      - FIRSTADMIN_PASSWORD=adminadmin
 
 
-  recycling-points-db:
+  ecohub-db:
     image: postgres:13.7-alpine
-    container_name: recycling-points-db
+    container_name: ecohub-db
     ports:
       - "6541:5432"
     environment:

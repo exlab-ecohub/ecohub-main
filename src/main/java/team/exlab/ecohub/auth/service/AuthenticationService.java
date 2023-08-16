@@ -53,7 +53,7 @@ public class AuthenticationService {
         String accessToken = jwtService.generateAccessToken((UserDetails) auth.getPrincipal());
         String refreshToken = jwtService.generateRefreshToken((UserDetails) auth.getPrincipal(), loginRequestDto.isRememberMe());
         tokenService.revokeAllUserTokens(currentUser);
-        tokenService.saveUserToken(currentUser, refreshToken, loginRequestDto.isRememberMe());
+        tokenService.saveUserToken(currentUser, passwordEncoder.encode(refreshToken), loginRequestDto.isRememberMe());
 
         User user = (User) auth.getPrincipal();
 
@@ -94,19 +94,21 @@ public class AuthenticationService {
 
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = jwtService.parseJwtFromRequest(request);
+        String encodedRefreshToken = passwordEncoder.encode(refreshToken);
 
-        if (tokenRepository.findByRefreshToken(refreshToken).isPresent() &&
+        String username = jwtService.getUserNameFromJwtToken(refreshToken);
+        User user = userRepository.findUserByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException(String.format("User with username %s not found", username)));
+
+        if (tokenRepository.findByRefreshToken(passwordEncoder.encode(refreshToken)).isPresent() &&
                 jwtService.validateRefreshToken(refreshToken)) {
 
-            String username = jwtService.getUserNameFromJwtToken(refreshToken);
-            User user = userRepository.findUserByUsername(username)
-                    .orElseThrow(() -> new UserNotFoundException(String.format("User with username %s not found", username)));
 
             String accessToken = jwtService.generateAccessToken(user);
             refreshToken = jwtService.generateRefreshToken(user, jwtService.getRememberMeFromJwtToken(refreshToken));
 
             tokenService.revokeAllUserTokens(user);
-            tokenService.saveUserToken(user, refreshToken, jwtService.getRememberMeFromJwtToken(refreshToken));
+            tokenService.saveUserToken(user, passwordEncoder.encode(refreshToken), jwtService.getRememberMeFromJwtToken(refreshToken));
 
             try {
                 new ObjectMapper().writeValue(response.getOutputStream(), new JwtResponseDto(accessToken,
