@@ -38,4 +38,8 @@ public class Token {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
+
+    public boolean isValid() {
+        return !revoked && !expired;
+    }
 }
