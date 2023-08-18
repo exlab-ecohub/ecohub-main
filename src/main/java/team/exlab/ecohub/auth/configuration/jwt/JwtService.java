@@ -12,9 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import team.exlab.ecohub.token.Token;
 import team.exlab.ecohub.token.TokenPurpose;
-import team.exlab.ecohub.token.TokenRepository;
 
 import javax.servlet.http.HttpServletRequest;
 import java.security.Key;
@@ -28,7 +26,6 @@ import java.util.Map;
 public class JwtService {
 
     private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS512);
-    private final TokenRepository tokenRepository;
     @Value("${app.accessTokenExpirationMs}")
     private long accessTokenExpirationMs;
     @Value("${app.refreshTokenExpirationMs}")
@@ -63,7 +60,7 @@ public class JwtService {
                     .getBody()
                     .getExpiration()
                     .after(new Date()) &&
-                    getPurposeFromJwtToken(jwt).equals(TokenPurpose.ACCESS.name());
+                    getPurposeFromJwt(jwt).equals(TokenPurpose.ACCESS.name());
         } catch (MalformedJwtException | IllegalArgumentException e) {
             log.warn("Exception while validating access token", e);
         }
@@ -72,18 +69,13 @@ public class JwtService {
 
     public boolean validateRefreshToken(String jwt) {
         try {
-            Token token = tokenRepository.findByRefreshToken(jwt).orElseThrow();
             return Jwts.parser().setSigningKey(key)
                     .parseClaimsJws(jwt)
                     .getBody()
                     .getExpiration()
                     .after(new Date())
                     &&
-                    getPurposeFromJwtToken(jwt).equals(TokenPurpose.REFRESH.name())
-                    &&
-                    !token.isExpired()
-                    &&
-                    !token.isRevoked();
+                    getPurposeFromJwt(jwt).equals(TokenPurpose.REFRESH.name());
         } catch (MalformedJwtException | IllegalArgumentException e) {
             log.warn("Exception while validating refresh token", e);
         }
@@ -100,15 +92,15 @@ public class JwtService {
         return null;
     }
 
-    public String getUserNameFromJwtToken(String jwt) {
+    public String getUserNameFromJwt(String jwt) {
         return Jwts.parser().setSigningKey(key).parseClaimsJws(jwt).getBody().getSubject();
     }
 
-    public String getPurposeFromJwtToken(String jwt) {
+    public String getPurposeFromJwt(String jwt) {
         return (String) Jwts.parser().setSigningKey(key).parseClaimsJws(jwt).getBody().get("type");
     }
 
-    public boolean getRememberMeFromJwtToken(String jwt) {
+    public boolean getRememberMeFromJwt(String jwt) {
         return (boolean) Jwts.parser().setSigningKey(key).parseClaimsJws(jwt).getBody().get("rememberMe");
     }
 

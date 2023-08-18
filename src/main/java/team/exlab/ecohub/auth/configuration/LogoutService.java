@@ -27,10 +27,10 @@ public class LogoutService implements LogoutHandler {
                        Authentication authentication) {
         final String accessToken = jwtService.parseJwtFromRequest(request);
         if (accessToken != null) {
-            String username = jwtService.getUserNameFromJwtToken(accessToken);
+            String username = jwtService.getUserNameFromJwt(accessToken);
             User user = userRepository.findUserByUsername(username).orElseThrow(() ->
-                    new UserNotFoundException(String.format("User with username %s not found", username)));
-            tokenService.revokeAllUserTokens(user);
+                    new UserNotFoundException(username));
+            tokenService.revokeRefreshToken(user);
             SecurityContextHolder.clearContext();
         }
     }

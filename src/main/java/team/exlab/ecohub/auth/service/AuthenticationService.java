@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import team.exlab.ecohub.auth.configuration.jwt.JwtService;
 import team.exlab.ecohub.auth.dto.*;
 import team.exlab.ecohub.exception.UserNotFoundException;
+import team.exlab.ecohub.token.Token;
 import team.exlab.ecohub.token.TokenRepository;
 import team.exlab.ecohub.token.TokenService;
 import team.exlab.ecohub.user.model.ERole;
@@ -26,6 +27,7 @@ import team.exlab.ecohub.user.repository.UserRepository;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -52,8 +54,12 @@ public class AuthenticationService {
 
         String accessToken = jwtService.generateAccessToken((UserDetails) auth.getPrincipal());
         String refreshToken = jwtService.generateRefreshToken((UserDetails) auth.getPrincipal(), loginRequestDto.isRememberMe());
-        tokenService.revokeAllUserTokens(currentUser);
-        tokenService.saveUserToken(currentUser, passwordEncoder.encode(refreshToken), loginRequestDto.isRememberMe());
+        Optional<Token> token = tokenRepository.findTokenByUserId(currentUser.getId());
+        if (token.isPresent()) {
+            tokenService.updateRefreshToken(currentUser, passwordEncoder.encode(refreshToken));
+        } else {
+            tokenService.saveRefreshToken(currentUser, passwordEncoder.encode(refreshToken), loginRequestDto.isRememberMe());
+        }
 
         User user = (User) auth.getPrincipal();
 
@@ -94,21 +100,19 @@ public class AuthenticationService {
 
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = jwtService.parseJwtFromRequest(request);
-        String encodedRefreshToken = passwordEncoder.encode(refreshToken);
 
-        String username = jwtService.getUserNameFromJwtToken(refreshToken);
+        String username = jwtService.getUserNameFromJwt(refreshToken);
         User user = userRepository.findUserByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException(String.format("User with username %s not found", username)));
+                .orElseThrow(() -> new UserNotFoundException(username));
+        Optional<Token> token = tokenRepository.findTokenByUserId(user.getId());
 
-        if (tokenRepository.findByRefreshToken(passwordEncoder.encode(refreshToken)).isPresent() &&
+        if (token.isPresent() && token.get().isValid() &&
+                passwordEncoder.matches(refreshToken, token.get().getRefreshToken()) &&
                 jwtService.validateRefreshToken(refreshToken)) {
-
-
             String accessToken = jwtService.generateAccessToken(user);
-            refreshToken = jwtService.generateRefreshToken(user, jwtService.getRememberMeFromJwtToken(refreshToken));
+            refreshToken = jwtService.generateRefreshToken(user, jwtService.getRememberMeFromJwt(refreshToken));
 
-            tokenService.revokeAllUserTokens(user);
-            tokenService.saveUserToken(user, passwordEncoder.encode(refreshToken), jwtService.getRememberMeFromJwtToken(refreshToken));
+            tokenService.updateRefreshToken(user, passwordEncoder.encode(refreshToken));
 
             try {
                 new ObjectMapper().writeValue(response.getOutputStream(), new JwtResponseDto(accessToken,
@@ -118,8 +122,9 @@ public class AuthenticationService {
             } catch (IOException e) {
                 log.warn("Error while writing response with new tokens", e);
             }
+        } else {
+            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
         }
-        response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
     }
 
     public ResponseEntity<MessageResponseDto> registerAdmin(SignupAdminRequestDto signupAdminRequestDto) {

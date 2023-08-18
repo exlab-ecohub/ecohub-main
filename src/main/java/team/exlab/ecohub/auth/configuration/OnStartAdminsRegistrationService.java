@@ -29,18 +29,19 @@ public class OnStartAdminsRegistrationService implements InitializingBean {
     public void afterPropertiesSet() {
         //todo Как правильно создавать учетки суперадмина и админа при запуске приложения?
 
-        User superAdmin = new User(superadminLogin,
-                passwordEncoder.encode(superadminPassword),
-                null);
-//        User superAdmin = new User("superadmin", passwordEncoder.encode("superadmin"), null);
-        superAdmin.setRole(roleRepository.findRoleByName(ERole.ROLE_SUPERADMIN).orElseThrow());
-
-        User admin = new User(firstAdminLogin,
-                passwordEncoder.encode(firstAdminPassword),
-                null);
-//        User admin = new User("admin", passwordEncoder.encode("adminadmin"), null);
-        admin.setRole(roleRepository.findRoleByName(ERole.ROLE_ADMIN).orElseThrow());
-//        userRepository.save(superAdmin);
-//        userRepository.save(admin);
+        if (!userRepository.existsByUsername(superadminLogin)) {
+            User superAdmin = new User(superadminLogin,
+                    passwordEncoder.encode(superadminPassword),
+                    null);
+            superAdmin.setRole(roleRepository.findRoleByName(ERole.ROLE_SUPERADMIN).orElseThrow());
+            userRepository.save(superAdmin);
+        }
+        if (!userRepository.existsByUsername(firstAdminLogin)) {
+            User admin = new User(firstAdminLogin,
+                    passwordEncoder.encode(firstAdminPassword),
+                    null);
+            admin.setRole(roleRepository.findRoleByName(ERole.ROLE_ADMIN).orElseThrow());
+            userRepository.save(admin);
+        }
     }
 }
