@@ -25,9 +25,14 @@ public class FeedbackServiceImpl implements FeedbackService {
     }
 
     @Override
-    public FeedbackAdminDto createResponseToFeedback(FeedbackAdminDto feedbackAdminDto) {
-        StringBuilder response = feedbackAdminDto.getMessageContent();
-        return addResponseToMessage(feedbackAdminDto, response);
+    public FeedbackAdminDto createResponseToFeedback(Feedback feedback, String response) {
+        Long feedback_id = feedback.getFeedbackId();
+        Feedback feedbackToAlter = repository.findById(feedback_id).orElseThrow(() -> new FeedbackNotFoundException(feedback_id));
+        String feedbackResponseContent = String.join(feedbackToAlter.getResponseContent(), response);
+        feedbackToAlter.setResponseStatus(ResponseStatus.IN_PROGRESS);
+        feedbackToAlter.setResponseContent(feedbackResponseContent);
+        feedbackToAlter.setResponseTime(LocalDateTime.now());
+        return FeedbackAdminMapper.toDto(feedbackToAlter);
     }
 
     @Override
@@ -45,13 +50,10 @@ public class FeedbackServiceImpl implements FeedbackService {
         return null;
     }
 
-    public FeedbackAdminDto addResponseToMessage(FeedbackAdminDto feedbackAdminDto, StringBuilder response) {
-        Long feedback_id = feedbackAdminDto.getFeedbackId();
-        Feedback feedbackToAlter = repository.findById(feedback_id).orElseThrow(() -> new FeedbackNotFoundException(feedback_id));
-        StringBuilder sb = new StringBuilder(feedbackToAlter.getMessageContent());
-        sb.append("\n\n\n").append(LocalDateTime.now()).append("\n").append(response);
-        feedbackToAlter.setResponseStatus(ResponseStatus.IN_PROGRESS);
-        feedbackToAlter.setMessageContent(sb);
-        return FeedbackAdminMapper.toDto(feedbackToAlter);
+
+    @Override
+    public List<FeedbackUserDto> showFeedbacksForUser(Long userId) {
+        String email = repository.findById(userId).orElseThrow().getEmail();
+        return repository.findAllByEmailIs(email);
     }
 }

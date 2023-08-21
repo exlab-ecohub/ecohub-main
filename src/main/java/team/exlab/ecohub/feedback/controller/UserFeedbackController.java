@@ -9,23 +9,23 @@ import team.exlab.ecohub.feedback.dto.FeedbackUserMapper;
 import java.util.List;
 
 @RestController
-@RequestMapping("/feedbacks")
 @RequiredArgsConstructor
 public class UserFeedbackController {
     private final FeedbackService feedbackService;
     private final FeedbackRepository repository;
 
-    @GetMapping
-    public List<Feedback> getFeedbacks() {
-        return repository.findAll();
-    }
 
-    @PostMapping
+    @PostMapping("/feedbacks")
     public FeedbackUserDto createFeedback(@RequestBody FeedbackUserDto userFeedback) {
         return feedbackService.createFeedback(userFeedback);
     }
+    @GetMapping("/user/feedbacks")
+    public List<FeedbackUserDto> getAllFeedbacks(@RequestParam Long userId) {
+        //User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return feedbackService.showFeedbacksForUser(userId);
+    }
 
-    @GetMapping("/{id}")
+    @GetMapping("/user/feedbacks/{id}")
     public FeedbackUserDto readFeedback(@PathVariable Long id) {
         Feedback feedback = repository.findById(id).orElseThrow(() -> new FeedbackNotFoundException(id));
         return FeedbackUserMapper.toDto(feedback);

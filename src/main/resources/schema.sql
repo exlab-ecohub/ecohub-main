@@ -37,12 +37,12 @@ CREATE TABLE TOKENS
     user_id       bigint REFERENCES USERS (id) ON DELETE CASCADE      NOT NULL
 );
 
-DROP TYPE IF EXISTS response_status_enum CASCADE;
-CREATE TYPE response_status_enum AS ENUM (
-    'OPEN',
-    'IN_PROGRESS',
-    'CLOSED'
-    );
+-- DROP TYPE IF EXISTS response_status_enum CASCADE;
+-- CREATE TYPE response_status_enum AS ENUM (
+--     'OPEN',
+--     'IN_PROGRESS',
+--     'CLOSED'
+--     );
 
 CREATE TABLE IF NOT EXISTS FEEDBACKS
 (

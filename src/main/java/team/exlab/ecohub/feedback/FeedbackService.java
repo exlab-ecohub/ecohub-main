@@ -8,10 +8,11 @@ import java.util.List;
 public interface FeedbackService {
     FeedbackUserDto createFeedback(FeedbackUserDto userFeedback);
 
-    FeedbackAdminDto createResponseToFeedback(FeedbackAdminDto feedbackAdminDto);
+    FeedbackAdminDto createResponseToFeedback(Feedback feedback, String response);
     List<FeedbackAdminDto> getFeedbacks(ResponseStatus responseStatus);
     List<FeedbackAdminDto> getFeedbacks(ResponseStatus responseStatus, String message_topic);
     FeedbackUserDto getFeedbackAndResponse(FeedbackUserDto feedbackUserDto);
+    List<FeedbackUserDto> showFeedbacksForUser(Long userId);
 
 
 
