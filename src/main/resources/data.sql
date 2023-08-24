@@ -1,7 +1,8 @@
 INSERT INTO ROLES (name)
 VALUES ('ROLE_SUPERADMIN'),
        ('ROLE_ADMIN'),
-       ('ROLE_USER');
+       ('ROLE_USER')
+ON CONFLICT DO NOTHING;
 
 INSERT INTO RECYCLABLE_TYPES (name)
 VALUES ('PLASTIC'),
@@ -11,7 +12,8 @@ VALUES ('PLASTIC'),
        ('APPLIANCES'),
        ('HAZARDOUS_WASTE'),
        ('METAL'),
-       ('CLOTHES');
+       ('CLOTHES')
+ON CONFLICT DO NOTHING;
 
 INSERT INTO RECYCLING_POINTS (name, website, address, latitude, longitude, displayed)
 VALUES ('Пункт №29 ОАО "Белвторресурсы"', 'https://belvtorresurs.by/', 'г.Минск, ул.Челюскинцев, 30', 53.871875, 27.647768, true),
@@ -81,7 +83,8 @@ VALUES ('Пункт №29 ОАО "Белвторресурсы"', 'https://belvt
        ('Пункт №43 ОАО "Белвторресурсы"', 'https://belvtorresurs.by/', 'г.Минск, ул. Некрасова, 109', 53.940490, 27.572632, true),
        ('Пункт №42 ОАО "Белвторресурсы"', 'https://belvtorresurs.by/', 'г.Минск, 4 пер. Кольцова, 53/2', 53.953315, 27.597728, true),
        ('Пункт №8 ОАО "Белвторресурсы"', 'https://belvtorresurs.by/', 'г.Минск, ул. Будславская, 4', 53.959294, 27.537586, true),
-       ('Пункт №77 ОАО "Белвторресурсы"', 'https://belvtorresurs.by/', 'г.Минск, ул.Нововиленская, 38', 53.938061, 27.532338, true);
+       ('Пункт №77 ОАО "Белвторресурсы"', 'https://belvtorresurs.by/', 'г.Минск, ул.Нововиленская, 38', 53.938061, 27.532338, true)
+ON CONFLICT DO NOTHING;
 
 INSERT INTO WORKING_HOURS (recycling_point_id, day_of_week, opening_time, closing_time, lunch_start_time, lunch_end_time)
 VALUES (1,0,'09:00:00','18:00:00','14:00:00','15:00:00'),
@@ -478,7 +481,8 @@ VALUES (1,0,'09:00:00','18:00:00','14:00:00','15:00:00'),
        (68,2,'09:00:00','17:00:00','13:00:00','14:00:00'),
        (68,3,'09:00:00','17:00:00','13:00:00','14:00:00'),
        (68,4,'09:00:00','17:00:00','13:00:00','14:00:00'),
-       (68,5,'09:00','14:00',null,null);
+       (68,5,'09:00','14:00',null,null)
+ON CONFLICT DO NOTHING;
 
 INSERT INTO RECYCLING_POINTS_RECYCLABLE_TYPES (recycling_point_id, recyclable_type_id)
 VALUES (1,1),
@@ -820,4 +824,5 @@ VALUES (1,1),
        (68,2),
        (68,3),
        (68,5),
-       (68,7);
+       (68,7)
+ON CONFLICT DO NOTHING;

@@ -19,7 +19,7 @@ import javax.validation.Valid;
 public class AuthenticationSuperadminController {
     private final AuthenticationService authenticationService;
 
-    @PostMapping("/register-admin")
+    @PostMapping("/admins")
     public ResponseEntity<MessageResponseDto> registerAdmin(@Valid @RequestBody SignupAdminRequestDto signupAdminRequestDto) {
         return authenticationService.registerAdmin(signupAdminRequestDto);
     }
