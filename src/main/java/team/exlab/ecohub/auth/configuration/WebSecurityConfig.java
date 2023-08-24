@@ -59,6 +59,8 @@ public class WebSecurityConfig {
                 .hasAnyRole("ADMIN", "SUPERADMIN")
                 .antMatchers("/superadmin/**")
                 .hasRole("SUPERADMIN")
+                .antMatchers("/user/**")
+                .hasRole("USER")
                 .anyRequest()
                 .permitAll();
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);

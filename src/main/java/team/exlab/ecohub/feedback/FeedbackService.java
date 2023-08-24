@@ -1,6 +1,7 @@
 package team.exlab.ecohub.feedback;
 
-import team.exlab.ecohub.feedback.dto.FeedbackAdminDto;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import team.exlab.ecohub.feedback.dto.FeedbackUserDto;
 
 import java.util.List;
@@ -8,11 +9,12 @@ import java.util.List;
 public interface FeedbackService {
     FeedbackUserDto createFeedback(FeedbackUserDto userFeedback);
 
-    FeedbackAdminDto createResponseToFeedback(Feedback feedback, String response);
-    List<FeedbackAdminDto> getFeedbacks(ResponseStatus responseStatus);
-    List<FeedbackAdminDto> getFeedbacks(ResponseStatus responseStatus, String message_topic);
-    FeedbackUserDto getFeedbackAndResponse(FeedbackUserDto feedbackUserDto);
-    List<FeedbackUserDto> showFeedbacksForUser(Long userId);
+    Feedback createResponseToFeedback(Feedback feedback, String response);
+    CollectionModel<EntityModel<Feedback>> getFeedbacks(ResponseStatus responseStatus, MessageTopic messageTopic);
+//    CollectionModel<EntityModel<Feedback>> getFeedbacksByStatus(ResponseStatus responseStatus);
+//    CollectionModel<EntityModel<Feedback>> getFeedbacksByStatusAndTopic(ResponseStatus responseStatus, MessageTopic messageTopic);
+    FeedbackUserDto getOneFeedbackForUser(Long feedbackId);
+    List<FeedbackUserDto> getAllFeedbacksForUser();
 
 
 

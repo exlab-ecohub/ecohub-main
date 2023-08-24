@@ -30,5 +30,10 @@ public class OnStartAdminsRegistrationService implements InitializingBean {
         User admin = new User("admin", passwordEncoder.encode("adminadmin"), null);
         admin.setRole(roleRepository.findRoleByName(ERole.ROLE_ADMIN).orElseThrow());
         userRepository.save(admin);
+
+//      User user = new User("user", 123, pavel.shagoyko@gmail.com)
+        User user = new User("testUser", passwordEncoder.encode("testPassword"),"pavel11sg@gmail.com");
+        user.setRole(roleRepository.findRoleByName(ERole.ROLE_USER).orElseThrow());
+        userRepository.save(user);
     }
 }

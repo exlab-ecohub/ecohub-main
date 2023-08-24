@@ -3,10 +3,12 @@ package team.exlab.ecohub.feedback;
 import lombok.*;
 import org.hibernate.annotations.Type;
 import org.springframework.format.annotation.DateTimeFormat;
+import team.exlab.ecohub.user.model.User;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -20,10 +22,22 @@ public class Feedback {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "feedback_id")
     private Long feedbackId;
+    @Column(name = "name")
+    private String name;
+
+    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     @Column(name = "email")
     private String email;
     @Column(name = "message_topic")
-    private String messageTopic;
+    @Enumerated(EnumType.STRING)
+    private MessageTopic messageTopic;
+
+//    @OneToMany(fetch = FetchType.EAGER, mappedBy = "feedback")
+//    private Set<MessageAndResponse> messagesAndResponses;
+
     @Column(name = "message_content")
     private String messageContent;
     @Column(name = "message_time")

@@ -7,6 +7,7 @@ import team.exlab.ecohub.feedback.Feedback;
 public class FeedbackUserMapper {
     public static FeedbackUserDto toDto(Feedback feedback) {
         return FeedbackUserDto.builder().
+                name(feedback.getName()).
                 email(feedback.getEmail()).
                 messageTopic(feedback.getMessageTopic()).
                 messageContent(feedback.getMessageContent()).
@@ -19,6 +20,7 @@ public class FeedbackUserMapper {
 
     public static Feedback toFeedback(FeedbackUserDto feedbackUserDto) {
         return Feedback.builder().
+                name(feedbackUserDto.getName()).
                 email(feedbackUserDto.getEmail()).
                 messageTopic(feedbackUserDto.getMessageTopic()).
                 messageContent(feedbackUserDto.getMessageContent()).
