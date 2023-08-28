@@ -7,14 +7,12 @@ import lombok.ToString;
 import org.hibernate.Hibernate;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import team.exlab.ecohub.feedback.Feedback;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 @Setter
 @Getter
@@ -38,8 +36,8 @@ public class User implements UserDetails {
     @JoinColumn(name = "role_id", referencedColumnName = "id")
     private Role role;
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "user")
-    private Set<Feedback> feedbacks;
+//    @OneToMany(mappedBy = "user")
+//    private Set<Feedback> feedbacks;
 
     public User(String username, String password, String email) {
         this.username = username;

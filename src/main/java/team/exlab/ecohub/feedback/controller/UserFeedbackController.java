@@ -1,11 +1,11 @@
 package team.exlab.ecohub.feedback.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
 import org.springframework.web.bind.annotation.*;
-import team.exlab.ecohub.feedback.*;
 import team.exlab.ecohub.feedback.dto.FeedbackUserDto;
-
-import java.util.List;
+import team.exlab.ecohub.feedback.service.FeedbackService;
 
 @RestController
 @RequiredArgsConstructor
@@ -14,16 +14,16 @@ public class UserFeedbackController {
 
 
     @PostMapping("/feedbacks")
-    public FeedbackUserDto createFeedback(@RequestBody FeedbackUserDto userFeedback) {
+    public EntityModel<FeedbackUserDto> createFeedback(@RequestBody FeedbackUserDto userFeedback) {
         return service.createFeedback(userFeedback);
     }
     @GetMapping("/user/feedbacks")
-    public List<FeedbackUserDto> getAllFeedbacks() {
+    public CollectionModel<EntityModel<FeedbackUserDto>> getAllFeedbacks() {
         return service.getAllFeedbacksForUser();
     }
 
-    @GetMapping("/user/feedbacks/{feedbackId}")
-    public FeedbackUserDto getOneFeedback(@PathVariable Long feedbackId) {
-        return service.getOneFeedbackForUser(feedbackId);
+    @GetMapping("/user/feedbacks/{userFeedbackCount}")
+    public EntityModel<FeedbackUserDto> getOneFeedback(@PathVariable Integer userFeedbackCount) {
+        return service.getOneFeedbackForUser(userFeedbackCount);
     }
 }

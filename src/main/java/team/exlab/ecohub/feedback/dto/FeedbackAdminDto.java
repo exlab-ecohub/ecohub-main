@@ -11,11 +11,12 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@Builder
 @AllArgsConstructor
-public class FeedbackUserDto {
-    private String name;
+@Builder
+public class FeedbackAdminDto {
+    private Long id;
     private int userFeedbackCount;
+    private String name;
     private String email;
     private MessageTopic messageTopic;
     private String messageContent;
@@ -23,5 +24,4 @@ public class FeedbackUserDto {
     private String responseContent;
     private LocalDateTime responseTime;
     private ResponseStatus responseStatus;
-    //    private Set<MessageAndResponse> messagesAndResponses;
 }

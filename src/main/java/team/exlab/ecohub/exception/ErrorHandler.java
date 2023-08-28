@@ -23,7 +23,7 @@ public class ErrorHandler {
         );
     }
 
-    @ExceptionHandler({UserNotFoundException.class, RecyclingPointNotFoundException.class, NoSuchElementException.class})
+    @ExceptionHandler({UserNotFoundException.class, RecyclingPointNotFoundException.class, NoSuchElementException.class, FeedbackNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundExceptions(final RuntimeException e) {
         return new ErrorResponse(

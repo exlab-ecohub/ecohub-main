@@ -1,14 +1,11 @@
-package team.exlab.ecohub.feedback;
+package team.exlab.ecohub.feedback.model;
 
 import lombok.*;
-import org.hibernate.annotations.Type;
 import org.springframework.format.annotation.DateTimeFormat;
 import team.exlab.ecohub.user.model.User;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Set;
 
 @Entity
 @Getter
@@ -20,31 +17,30 @@ import java.util.Set;
 public class Feedback {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "feedback_id")
-    private Long feedbackId;
+    @Column(name = "id")
+    private Long id;
+    @Column(name = "user_feedback_count")
+    private int userFeedbackCount;
     @Column(name = "name")
     private String name;
-
-    @ManyToOne(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
-    @JoinColumn(name = "user_id", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @JoinColumn(name = "user_id")
     private User user;
-
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
+    @JoinColumn(name = "admin_id")
+    private User admin;
     @Column(name = "email")
     private String email;
     @Column(name = "message_topic")
     @Enumerated(EnumType.STRING)
     private MessageTopic messageTopic;
-
-//    @OneToMany(fetch = FetchType.EAGER, mappedBy = "feedback")
-//    private Set<MessageAndResponse> messagesAndResponses;
-
     @Column(name = "message_content")
     private String messageContent;
     @Column(name = "message_time")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME, pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime messageTime;
-    @Column(name = "admin_id")
-    private Long adminId;
+    //    @Column(name = "admin_id")
+//    private Long adminId;
     @Column(name = "response_content")
     private String responseContent;
     @Column(name = "response_time")

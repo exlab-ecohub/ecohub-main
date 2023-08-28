@@ -1,4 +1,4 @@
-package team.exlab.ecohub.feedback;
+package team.exlab.ecohub.feedback.model;
 
 import java.io.Serializable;
 

@@ -3,40 +3,34 @@ package team.exlab.ecohub.feedback.controller;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.web.bind.annotation.*;
-import team.exlab.ecohub.feedback.*;
-import team.exlab.ecohub.feedback.ResponseStatus;
+import team.exlab.ecohub.feedback.dto.FeedbackAdminDto;
+import team.exlab.ecohub.feedback.model.MessageTopic;
+import team.exlab.ecohub.feedback.model.ResponseStatus;
+import team.exlab.ecohub.feedback.service.FeedbackServiceImpl;
 
 @RestController
-@RequestMapping("/test")
+@RequestMapping("/admin")
 public class AdminFeedbackController {
-    private final FeedbackRepository repository;
     private final FeedbackServiceImpl service;
-    private final FeedbackModelAssembler assembler;
 
-    public AdminFeedbackController(FeedbackRepository feedbackRepository, FeedbackServiceImpl service, FeedbackModelAssembler assembler) {
-        this.repository = feedbackRepository;
+    public AdminFeedbackController(FeedbackServiceImpl service) {
         this.service = service;
-        this.assembler = assembler;
     }
 
     @GetMapping("/messages")
-    public CollectionModel<EntityModel<Feedback>> getAllMessages(@RequestParam(required = false, defaultValue = "DEFAULT") String status,
-                                                                 @RequestParam(required = false, defaultValue = "DEFAULT") String topic) {
+    public CollectionModel<EntityModel<FeedbackAdminDto>> getAllMessages(@RequestParam(required = false, defaultValue = "DEFAULT") String status,
+                                                                         @RequestParam(required = false, defaultValue = "DEFAULT") String topic) {
         return service.getFeedbacks(ResponseStatus.valueOf(status), MessageTopic.valueOf(topic));
     }
 
     @GetMapping("/messages/{id}")
-    public EntityModel<Feedback> getFeedbackById(@PathVariable Long id) {
-        Feedback feedback = repository.findById(id).orElseThrow(() -> new FeedbackNotFoundException(id));
-        return assembler.toModel(feedback);
+    public EntityModel<FeedbackAdminDto> getFeedbackById(@PathVariable Long id) {
+        return service.getOneFeedback(id);
     }
 
     @PostMapping("/messages/{id}")
-    public Feedback makeResponse(@RequestBody Feedback feedbackAdminDto, @PathVariable Long id) {
-        Feedback feedback = repository.findById(id).orElseThrow(() -> new FeedbackNotFoundException(id));
-        String response = feedbackAdminDto.getResponseContent();
-        service.createResponseToFeedback(feedback, response);
-        return repository.save(feedback);
+    public EntityModel<FeedbackAdminDto> makeResponse(@RequestBody FeedbackAdminDto feedbackAdminDto, @PathVariable Long id) {
+        return service.createResponseToFeedback(feedbackAdminDto, id);
     }
 
 }

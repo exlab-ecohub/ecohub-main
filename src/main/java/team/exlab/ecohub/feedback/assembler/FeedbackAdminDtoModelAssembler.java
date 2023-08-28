@@ -1,21 +1,20 @@
-package team.exlab.ecohub.feedback;
+package team.exlab.ecohub.feedback.assembler;
 
 import team.exlab.ecohub.feedback.controller.AdminFeedbackController;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;
-import team.exlab.ecohub.feedback.controller.UserFeedbackController;
-import team.exlab.ecohub.feedback.dto.FeedbackUserDto;
+import team.exlab.ecohub.feedback.dto.FeedbackAdminDto;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 @Component
-public class FeedbackModelAssembler implements RepresentationModelAssembler<Feedback, EntityModel<Feedback>> {
+public class FeedbackAdminDtoModelAssembler implements RepresentationModelAssembler<FeedbackAdminDto, EntityModel<FeedbackAdminDto>> {
     @Override
-    public EntityModel<Feedback> toModel(Feedback entity) {
+    public EntityModel<FeedbackAdminDto> toModel(FeedbackAdminDto entity) {
         return EntityModel.of(entity,
-                linkTo(methodOn(AdminFeedbackController.class).getFeedbackById(entity.getFeedbackId())).withSelfRel(),
+                linkTo(methodOn(AdminFeedbackController.class).getFeedbackById(entity.getId())).withSelfRel(),
                 linkTo(methodOn(AdminFeedbackController.class).getAllMessages(entity.getResponseStatus().name(),entity.getMessageTopic().name())).withRel("messages"));
     }
 
