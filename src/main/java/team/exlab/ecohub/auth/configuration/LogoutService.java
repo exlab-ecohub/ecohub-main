@@ -6,6 +6,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.stereotype.Service;
 import team.exlab.ecohub.auth.configuration.jwt.JwtService;
+import team.exlab.ecohub.exception.JwtTokenException;
 import team.exlab.ecohub.exception.UserNotFoundException;
 import team.exlab.ecohub.token.TokenService;
 import team.exlab.ecohub.user.model.User;
@@ -27,7 +28,12 @@ public class LogoutService implements LogoutHandler {
                        Authentication authentication) {
         final String accessToken = jwtService.parseJwtFromRequest(request);
         if (accessToken != null) {
-            String username = jwtService.getUserNameFromJwt(accessToken);
+            String username;
+            try {
+                username = jwtService.getUserNameFromJwt(accessToken);
+            } catch (RuntimeException e){
+                throw new JwtTokenException(e.getMessage(), e);
+            }
             User user = userRepository.findUserByUsername(username).orElseThrow(() ->
                     new UserNotFoundException(username));
             tokenService.revokeRefreshToken(user);

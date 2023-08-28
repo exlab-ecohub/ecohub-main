@@ -33,7 +33,8 @@ public class ErrorHandler {
         );
     }
 
-    @ExceptionHandler({AuthenticationException.class, JwtException.class, SignatureException.class})
+    @ExceptionHandler({AuthenticationException.class, JwtTokenException.class,
+            JwtException.class, SignatureException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleBadCredentialsExceptions(final RuntimeException e) {
         return new ErrorResponse(
