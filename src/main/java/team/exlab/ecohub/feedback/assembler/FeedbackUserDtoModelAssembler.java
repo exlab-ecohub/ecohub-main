@@ -14,8 +14,6 @@ public class FeedbackUserDtoModelAssembler implements RepresentationModelAssembl
     @Override
     public EntityModel<FeedbackUserDto> toModel(FeedbackUserDto entity) {
 
-        return EntityModel.of(entity,
-                linkTo(methodOn(UserFeedbackController.class).getOneFeedback(entity.getUserFeedbackCount())).withSelfRel(),
-                linkTo(methodOn(UserFeedbackController.class).getAllFeedbacks()).withRel("feedbacks"));
+        return EntityModel.of(entity, linkTo(methodOn(UserFeedbackController.class).getFeedback(entity.getUserFeedbackCount())).withSelfRel(), linkTo(methodOn(UserFeedbackController.class).getAllFeedbacks()).withRel("feedbacks"));
     }
 }

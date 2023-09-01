@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.*;
 import team.exlab.ecohub.feedback.dto.FeedbackUserDto;
 import team.exlab.ecohub.feedback.service.FeedbackService;
 
+import javax.validation.Valid;
+
 @RestController
 @RequiredArgsConstructor
 public class UserFeedbackController {
@@ -14,16 +16,18 @@ public class UserFeedbackController {
 
 
     @PostMapping("/feedbacks")
-    public EntityModel<FeedbackUserDto> createFeedback(@RequestBody FeedbackUserDto userFeedback) {
+    @Valid
+    public EntityModel<FeedbackUserDto> createFeedback(@Valid @RequestBody FeedbackUserDto userFeedback) {
         return service.createFeedback(userFeedback);
     }
+
     @GetMapping("/user/feedbacks")
     public CollectionModel<EntityModel<FeedbackUserDto>> getAllFeedbacks() {
         return service.getAllFeedbacksForUser();
     }
 
     @GetMapping("/user/feedbacks/{userFeedbackCount}")
-    public EntityModel<FeedbackUserDto> getOneFeedback(@PathVariable Integer userFeedbackCount) {
+    public EntityModel<FeedbackUserDto> getFeedback(@PathVariable Integer userFeedbackCount) {
         return service.getOneFeedbackForUser(userFeedbackCount);
     }
 }

@@ -13,10 +13,16 @@ import java.util.Optional;
 @Repository
 public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
     List<Feedback> findAllByResponseStatus(ResponseStatus responseStatus);
+
     List<Feedback> findAllByMessageTopic(MessageTopic messageTopic);
+
     List<Feedback> findAllByResponseStatusAndMessageTopic(ResponseStatus responseStatus, MessageTopic messageTopic);
+
     List<Feedback> findAllByEmail(String email);
-    Optional<Integer> countFeedbackByEmail(String email);
+    Optional<Feedback> findFirstByEmail(String email);
+
+    int countFeedbackByEmail(String email);
+
     Feedback findFeedbackByUserFeedbackCountAndUser(Integer userFeedbackCount, User users);
 
 }

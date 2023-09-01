@@ -35,10 +35,6 @@ public class User implements UserDetails {
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id", referencedColumnName = "id")
     private Role role;
-
-//    @OneToMany(mappedBy = "user")
-//    private Set<Feedback> feedbacks;
-
     public User(String username, String password, String email) {
         this.username = username;
         this.email = email;

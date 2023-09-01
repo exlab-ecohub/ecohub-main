@@ -6,11 +6,13 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import team.exlab.ecohub.exception.UserNotFoundException;
 import team.exlab.ecohub.exception.FeedbackNotFoundException;
 import team.exlab.ecohub.feedback.assembler.FeedbackAdminDtoModelAssembler;
 import team.exlab.ecohub.feedback.assembler.FeedbackUserDtoModelAssembler;
-import team.exlab.ecohub.feedback.dto.*;
+import team.exlab.ecohub.feedback.dto.FeedbackAdminDto;
+import team.exlab.ecohub.feedback.dto.FeedbackAdminMapper;
+import team.exlab.ecohub.feedback.dto.FeedbackUserDto;
+import team.exlab.ecohub.feedback.dto.FeedbackUserMapper;
 import team.exlab.ecohub.feedback.model.Feedback;
 import team.exlab.ecohub.feedback.model.MessageTopic;
 import team.exlab.ecohub.feedback.model.ResponseStatus;
@@ -28,7 +30,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class FeedbackServiceImpl implements FeedbackService {
     private final FeedbackRepository feedbackRepository;
-    private final UserRepository userRepository;
     private final FeedbackAdminDtoModelAssembler adminAssembler;
     private final FeedbackUserDtoModelAssembler userAssembler;
 
@@ -50,19 +51,19 @@ public class FeedbackServiceImpl implements FeedbackService {
     @Override
     @Transactional
     public EntityModel<FeedbackAdminDto> getOneFeedback(Long feedbackId) {
-        Feedback feedback = feedbackRepository.findById(feedbackId).orElseThrow();
+        Feedback feedback = feedbackRepository.findById(feedbackId).orElseThrow(() -> new FeedbackNotFoundException(feedbackId));
         FeedbackAdminDto feedbackAdminDto = FeedbackAdminMapper.toDto(feedback);
         return adminAssembler.toModel(feedbackAdminDto);
     }
+
     @Override
     @Transactional
     public EntityModel<FeedbackAdminDto> createResponseToFeedback(FeedbackAdminDto feedbackAdminDto, Long feedbackId) {
         User admin = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Feedback feedbackForAnswer = feedbackRepository.findById(feedbackId).orElseThrow(() -> new FeedbackNotFoundException(feedbackId));
-        String responseContent = feedbackAdminDto.getResponseContent();
         feedbackForAnswer.setAdmin(admin);
         feedbackForAnswer.setResponseStatus(ResponseStatus.CLOSED);
-        feedbackForAnswer.setResponseContent(responseContent);
+        feedbackForAnswer.setResponseContent(feedbackAdminDto.getResponseContent());
         feedbackForAnswer.setResponseTime(LocalDateTime.now());
         return adminAssembler.toModel(FeedbackAdminMapper.toDto(feedbackForAnswer));
     }
@@ -70,22 +71,27 @@ public class FeedbackServiceImpl implements FeedbackService {
     //Methods designated for users
     @Override
     @Transactional
-    public EntityModel<FeedbackUserDto> createFeedback(FeedbackUserDto userFeedback) {
-        User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Feedback feedbackForSave = FeedbackUserMapper.toFeedback(userFeedback);
-        String email = currentUser.getEmail();
-        Optional<Integer> userFeedbackCount = feedbackRepository.countFeedbackByEmail(email);
-        if (userFeedbackCount.isPresent()) {
+    public EntityModel<FeedbackUserDto> createFeedback(FeedbackUserDto feedbackUserDto) {
+        Feedback feedbackForSave = FeedbackUserMapper.toFeedback(feedbackUserDto);
+        Optional<Feedback> feedback = feedbackRepository.findFirstByEmail(feedbackUserDto.getEmail());
+        feedback.ifPresent(feedback1 -> {
+            feedbackForSave.setUser(feedback1.getUser());
+        });
+        int userFeedbackCount = feedbackRepository.countFeedbackByEmail(feedbackUserDto.getEmail());
+        if (userFeedbackCount == 0) {
             feedbackForSave.setUserFeedbackCount(1);
         } else {
-            feedbackForSave.setUserFeedbackCount(userFeedbackCount.get() + 1);
+            feedbackForSave.setUserFeedbackCount(userFeedbackCount + 1);
         }
-        feedbackForSave.setUser(currentUser);
+        if (Objects.equals(feedbackUserDto.getMessageTopic(), null)) {
+            feedbackForSave.setMessageTopic(MessageTopic.DEFAULT);
+        }
+        feedbackForSave.setMessageContent(feedbackUserDto.getMessageContent());
         feedbackForSave.setResponseStatus(ResponseStatus.OPEN);
-        feedbackForSave.setMessageContent(userFeedback.getMessageContent());
         feedbackForSave.setMessageTime(LocalDateTime.now());
         return userAssembler.toModel(FeedbackUserMapper.toDto(feedbackRepository.save(feedbackForSave)));
     }
+
     @Override
     @Transactional
     public EntityModel<FeedbackUserDto> getOneFeedbackForUser(Integer userFeedbackCount) {
@@ -99,39 +105,29 @@ public class FeedbackServiceImpl implements FeedbackService {
     @Transactional
     public CollectionModel<EntityModel<FeedbackUserDto>> getAllFeedbacksForUser() {
         User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String email = userRepository.findById(currentUser.getId()).orElseThrow(() -> new UserNotFoundException(String.format("User with id = %s not found", currentUser.getId()))).getEmail();
-        List<EntityModel<FeedbackUserDto>> feedbackModels = feedbackRepository.findAllByEmail(email).stream().map(FeedbackUserMapper::toDto)
-                .map(userAssembler::toModel).collect(Collectors.toList());
+        List<EntityModel<FeedbackUserDto>> feedbackModels = feedbackRepository.findAllByEmail(currentUser.getEmail()).stream().map(FeedbackUserMapper::toDto).map(userAssembler::toModel).collect(Collectors.toList());
         return CollectionModel.of(feedbackModels);
     }
 
 
     //Supplementary methods
     private CollectionModel<EntityModel<FeedbackAdminDto>> getAllFeedbacks() {
-        List<EntityModel<FeedbackAdminDto>> models = feedbackRepository.findAll().stream()
-                .map(FeedbackAdminMapper::toDto)
-                .map(adminAssembler::toModel).collect(Collectors.toList());
+        List<EntityModel<FeedbackAdminDto>> models = feedbackRepository.findAll().stream().map(FeedbackAdminMapper::toDto).map(adminAssembler::toModel).collect(Collectors.toList());
         return CollectionModel.of(models);
     }
 
     private CollectionModel<EntityModel<FeedbackAdminDto>> getFeedbacksByStatus(ResponseStatus status) {
-        List<EntityModel<FeedbackAdminDto>> models = feedbackRepository.findAllByResponseStatus(status).stream()
-                .map(FeedbackAdminMapper::toDto)
-                .map(adminAssembler::toModel).collect(Collectors.toList());
+        List<EntityModel<FeedbackAdminDto>> models = feedbackRepository.findAllByResponseStatus(status).stream().map(FeedbackAdminMapper::toDto).map(adminAssembler::toModel).collect(Collectors.toList());
         return CollectionModel.of(models);
     }
 
     private CollectionModel<EntityModel<FeedbackAdminDto>> getFeedbacksByMessageTopic(MessageTopic topic) {
-        List<EntityModel<FeedbackAdminDto>> models = feedbackRepository.findAllByMessageTopic(topic).stream()
-                .map(FeedbackAdminMapper::toDto)
-                .map(adminAssembler::toModel).collect(Collectors.toList());
+        List<EntityModel<FeedbackAdminDto>> models = feedbackRepository.findAllByMessageTopic(topic).stream().map(FeedbackAdminMapper::toDto).map(adminAssembler::toModel).collect(Collectors.toList());
         return CollectionModel.of(models);
     }
 
     private CollectionModel<EntityModel<FeedbackAdminDto>> getFeedbacksByStatusAndTopic(ResponseStatus status, MessageTopic topic) {
-        List<EntityModel<FeedbackAdminDto>> models = feedbackRepository.findAllByResponseStatusAndMessageTopic(status, topic).stream()
-                .map(FeedbackAdminMapper::toDto)
-                .map(adminAssembler::toModel).collect(Collectors.toList());
+        List<EntityModel<FeedbackAdminDto>> models = feedbackRepository.findAllByResponseStatusAndMessageTopic(status, topic).stream().map(FeedbackAdminMapper::toDto).map(adminAssembler::toModel).collect(Collectors.toList());
         return CollectionModel.of(models);
     }
 

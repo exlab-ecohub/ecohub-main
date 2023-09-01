@@ -57,19 +57,19 @@ class AdminRecyclingPointControllerWebMvcTests {
                 DayOfWeek.SUNDAY, dailyWorkingHours);
     }
 
-    @BeforeEach
-    void beforeEach() {
-        point = new RecyclingPoint(
-                1L,
-                "pointName",
-                "pointAddress",
-                "pointPhoneNumber",
-                "pointWebsite",
-                new Location(0.0, 0.0),
-                workingHours,
-                Set.of(new RecyclableType(1L, ERecyclableType.METAL)));
-        pointDto = RecyclingPointMapper.toDto(point);
-    }
+//    @BeforeEach
+//    void beforeEach() {
+//        point = new RecyclingPoint(
+//                1L,
+//                "pointName",
+//                "pointAddress",
+//                "pointPhoneNumber",
+//                "pointWebsite",
+//                new Location(0.0, 0.0),
+//                workingHours,
+//                Set.of(new RecyclableType(1L, ERecyclableType.METAL)));
+//        pointDto = RecyclingPointMapper.toDto(point);
+//    }
 
     @Test
     void createPoint() throws Exception {

@@ -7,8 +7,6 @@ import team.exlab.ecohub.feedback.dto.FeedbackUserDto;
 import team.exlab.ecohub.feedback.model.MessageTopic;
 import team.exlab.ecohub.feedback.model.ResponseStatus;
 
-import java.util.List;
-
 public interface FeedbackService {
 
     EntityModel<FeedbackAdminDto> createResponseToFeedback(FeedbackAdminDto feedbackAdminDto, Long id);

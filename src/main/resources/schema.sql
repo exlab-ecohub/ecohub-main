@@ -1,12 +1,8 @@
 DROP TABLE IF EXISTS
     TOKENS,
-    FEEDBACK_USERS,
     FEEDBACKS,
     USERS,
     ROLES,
-    FEEDBACKS,
-    MESSAGES,
-    FEEDBACKS_USERS,
 --     USERS_ROLES,
     RECYCLING_POINTS,
     WORKING_HOURS,
@@ -57,60 +53,6 @@ CREATE TABLE IF NOT EXISTS FEEDBACKS
     response_status         character varying,
     PRIMARY KEY (id)
 );
-
--- insert into FEEDBACKS (user_id, user_feedback_count, name, email, message_topic, message_content, message_time, admin_id, response_content, response_time, response_status)
--- VALUES (3,
---         1,
---         'Pavel',
---         'pavel11sg@gmail.com',
---         'QUESTION',
---         'Добрый день! Исправьте пожалуйста контактные данные по пункту переработки по адресу ул.Слободская 4',
---         '2023-08-14 21:30',
---         null,
---         null,
---         null,
---         'OPEN');
--- insert into FEEDBACKS (name, email, message_topic, message_content, message_time, admin_id, response_content, response_time, response_status)
--- VALUES ('Alex',
---         'alexyatsenko@gmail.com',
---         'ERROR',
---         'Проверка работы',
---         '2023-08-15 20:25',
---         1,
---         'Ответ',
---         '2023-08-16 10:00',
---         'CLOSED');
-
--- CREATE TABLE IF NOT EXISTS feedbacks_users
--- (
---     feedbacks_id serial NOT NULL,
---     users_id serial NOT NULL
--- );
-
--- CREATE TABLE MESSAGES
--- (
---     feedback_id      bigint REFERENCES FEEDBACKS (feedback_id) ON DELETE CASCADE,
---     message_id       serial NOT NULL,
---     message_content  character varying(256),
---     message_time     timestamp,
---     response_content character varying(256),
---     response_time    timestamp,
---     PRIMARY KEY (feedback_id, message_id)
--- );
--- insert into MESSAGES (message_content, message_time, response_content, response_time)
--- VALUES (
---         'Добрый день! Подскажите как работает точка переработки №2. Спасибо!',
---         '2023-08-15 20:25',
---         'Здравстыуйте! Точка переработки работает согласно графика',
---         '2023-08-16 10:00'
---        );
--- insert into MESSAGES (message_content, message_time, response_content, response_time)
--- VALUES (
---            'Здравствуйте! Исправьте пожалуйста контактные данные по пункту переработки по адресу ул.Слободская 4',
---            '2023-08-15 20:20',
---            'Здравстыуйте! Точка переработки работает согласно графика',
---            '2023-08-17 10:00'
---        );
 
 CREATE TABLE RECYCLING_POINTS
 (

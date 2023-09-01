@@ -39,8 +39,6 @@ public class Feedback {
     @Column(name = "message_time")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME, pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime messageTime;
-    //    @Column(name = "admin_id")
-//    private Long adminId;
     @Column(name = "response_content")
     private String responseContent;
     @Column(name = "response_time")

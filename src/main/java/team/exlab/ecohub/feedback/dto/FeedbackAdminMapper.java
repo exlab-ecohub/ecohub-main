@@ -1,9 +1,7 @@
 package team.exlab.ecohub.feedback.dto;
 
-import org.springframework.stereotype.Component;
 import team.exlab.ecohub.feedback.model.Feedback;
 
-@Component
 public class FeedbackAdminMapper {
     public static FeedbackAdminDto toDto(Feedback feedback) {
         return FeedbackAdminDto.builder()
