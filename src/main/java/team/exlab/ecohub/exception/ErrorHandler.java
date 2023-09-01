@@ -1,5 +1,7 @@
 package team.exlab.ecohub.exception;
 
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.security.SignatureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
@@ -31,7 +33,7 @@ public class ErrorHandler {
         );
     }
 
-    @ExceptionHandler({AuthenticationException.class})
+    @ExceptionHandler({AuthenticationException.class, JwtException.class, SignatureException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleBadCredentialsExceptions(final RuntimeException e) {
         return new ErrorResponse(
