@@ -50,7 +50,6 @@ public class OnStartAdminsRegistrationService implements InitializingBean {
         userRepository.save(user2);
         Feedback feedback1 = new Feedback(
                 3L,
-                1,
                 "Pavel",
                 user1,
                 admin,
@@ -64,7 +63,6 @@ public class OnStartAdminsRegistrationService implements InitializingBean {
         feedbackRepository.save(feedback1);
         Feedback feedback2 = new Feedback(
                 4L,
-                1,
                 "Alex",
                 user2,
                 admin,

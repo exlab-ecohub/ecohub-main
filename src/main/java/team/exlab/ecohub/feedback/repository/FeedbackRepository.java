@@ -5,7 +5,6 @@ import org.springframework.stereotype.Repository;
 import team.exlab.ecohub.feedback.model.Feedback;
 import team.exlab.ecohub.feedback.model.MessageTopic;
 import team.exlab.ecohub.feedback.model.ResponseStatus;
-import team.exlab.ecohub.user.model.User;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,10 +18,11 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
     List<Feedback> findAllByResponseStatusAndMessageTopic(ResponseStatus responseStatus, MessageTopic messageTopic);
 
     List<Feedback> findAllByEmail(String email);
+
+    Optional <Feedback> findFeedbackByUserIdAndId(Long userId, Long feedbackId);
     Optional<Feedback> findFirstByEmail(String email);
 
-    int countFeedbackByEmail(String email);
 
-    Feedback findFeedbackByUserFeedbackCountAndUser(Integer userFeedbackCount, User users);
+
 
 }

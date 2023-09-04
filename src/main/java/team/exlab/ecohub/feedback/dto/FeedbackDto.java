@@ -16,14 +16,14 @@ import java.time.LocalDateTime;
 @Setter
 @Builder
 @AllArgsConstructor
-public class FeedbackUserDto {
+public class FeedbackDto {
+    private Long id;
     @NotBlank(message = "name is mandatory and can not be empty!")
     @Size(max = 30, message = "size should be less than 30")
     private String name;
-    private int userFeedbackCount;
     @NotBlank(message = "email is mandatory and can not be empty!")
     @Size(min = 5, max = 50, message = "size should be between 5 an 50 characters")
-    @Email(message = "provide a valid email", regexp = "[\\w\\.\\-]+@[a-z\\.]+\\.(ru|com|net|org)")
+    @Email(message = "provide a valid email", regexp = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*@[^-][A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$")
     private String email;
     private MessageTopic messageTopic;
     @Size(max = 500, message = "message should not be greater than 500 characters")

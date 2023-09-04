@@ -19,8 +19,6 @@ public class Feedback {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
-    @Column(name = "user_feedback_count")
-    private int userFeedbackCount;
     @Column(name = "name")
     private String name;
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)

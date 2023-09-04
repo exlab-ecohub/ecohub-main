@@ -41,7 +41,6 @@ CREATE TABLE IF NOT EXISTS FEEDBACKS
 (
     id                      serial NOT NULL,
     user_id                 bigint REFERENCES USERS (id) ON DELETE CASCADE,
-    user_feedback_count     int,
     name                    character varying,
     email                   character varying,
     message_topic           character varying,
