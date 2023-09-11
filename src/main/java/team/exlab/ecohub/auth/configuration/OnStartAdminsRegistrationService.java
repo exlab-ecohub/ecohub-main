@@ -25,6 +25,7 @@ public class OnStartAdminsRegistrationService implements InitializingBean {
     @Value("${app.firstadmin.password}")
     private String firstAdminPassword;
 
+
     @Override
     public void afterPropertiesSet() {
         //todo Как правильно создавать учетки суперадмина и админа при запуске приложения?

@@ -1,5 +1,6 @@
 -- DROP TABLE IF EXISTS
 --     TOKENS,
+--     FEEDBACKS,
 --     USERS,
 --     ROLES,
 --     RECYCLING_POINTS,
@@ -34,6 +35,23 @@ CREATE TABLE IF NOT EXISTS TOKENS
     revoked       boolean,
     expired       boolean,
     user_id       bigint REFERENCES USERS (id) ON DELETE CASCADE      NOT NULL
+);
+
+
+CREATE TABLE IF NOT EXISTS FEEDBACKS
+(
+    id                      serial NOT NULL,
+    user_id                 bigint REFERENCES USERS (id) ON DELETE CASCADE,
+    name                    character varying,
+    email                   character varying,
+    message_topic           character varying,
+    message_content         text,
+    message_time            timestamp,
+    admin_id                bigint REFERENCES USERS (id) ON DELETE CASCADE,
+    response_content        text,
+    response_time           timestamp,
+    response_status         character varying,
+    PRIMARY KEY (id)
 );
 
 CREATE TABLE IF NOT EXISTS RECYCLING_POINTS
