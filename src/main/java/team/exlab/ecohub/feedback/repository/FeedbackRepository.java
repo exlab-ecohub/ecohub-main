@@ -19,10 +19,5 @@ public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
 
     List<Feedback> findAllByEmail(String email);
 
-    Optional <Feedback> findFeedbackByUserIdAndId(Long userId, Long feedbackId);
-    Optional<Feedback> findFirstByEmail(String email);
-
-
-
-
+    Optional<Feedback> findFeedbackByEmailAndId(String email, Long feedbackId);
 }

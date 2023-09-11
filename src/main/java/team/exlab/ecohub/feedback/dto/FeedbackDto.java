@@ -1,9 +1,11 @@
 package team.exlab.ecohub.feedback.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
 import team.exlab.ecohub.feedback.model.MessageTopic;
 import team.exlab.ecohub.feedback.model.ResponseStatus;
 
@@ -28,8 +30,11 @@ public class FeedbackDto {
     private MessageTopic messageTopic;
     @Size(max = 500, message = "message should not be greater than 500 characters")
     private String messageContent;
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME, pattern = "yyyy-MM-dd HH:mm")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime messageTime;
     private String responseContent;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime responseTime;
     private ResponseStatus responseStatus;
 }
