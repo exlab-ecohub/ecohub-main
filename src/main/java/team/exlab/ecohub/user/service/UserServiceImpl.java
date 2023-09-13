@@ -6,7 +6,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import team.exlab.ecohub.exception.UserNotFoundException;
 import team.exlab.ecohub.user.repository.UserRepository;
 
 @Service
@@ -19,6 +18,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
         return userRepository.findUserByUsername(usernameOrEmail).orElseGet(
                 () -> userRepository.findUserByEmail(usernameOrEmail)
-                        .orElseThrow(() -> new UserNotFoundException(usernameOrEmail)));
+                        .orElseThrow(() -> new UsernameNotFoundException(
+                                String.format("User with username %s not found", usernameOrEmail))));
     }
 }

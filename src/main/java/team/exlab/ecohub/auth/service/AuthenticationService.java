@@ -7,16 +7,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import team.exlab.ecohub.auth.configuration.jwt.JwtService;
 import team.exlab.ecohub.auth.dto.*;
+import team.exlab.ecohub.exception.AdminBlockedException;
 import team.exlab.ecohub.exception.UserNotFoundException;
-import team.exlab.ecohub.token.Token;
 import team.exlab.ecohub.feedback.repository.FeedbackRepository;
+import team.exlab.ecohub.token.Token;
 import team.exlab.ecohub.token.TokenRepository;
 import team.exlab.ecohub.token.TokenService;
 import team.exlab.ecohub.user.model.ERole;
@@ -27,6 +28,8 @@ import team.exlab.ecohub.user.repository.UserRepository;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 @Slf4j
@@ -35,7 +38,6 @@ import java.util.Optional;
 public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
-
     private final TokenService tokenService;
     private final UserRepository userRepository;
     private final FeedbackRepository feedbackRepository;
@@ -45,24 +47,103 @@ public class AuthenticationService {
     private final PasswordEncoder passwordEncoder;
 
 
-    public ResponseEntity<JwtResponseDto> authenticateUser(LoginRequestDto loginRequestDto) {
+    public ResponseEntity<JwtResponseDto> authenticate(LoginRequestDto loginRequestDto) {
+        User requestedUser = (User) userService.loadUserByUsername(loginRequestDto.getUsernameOrEmail());
+        if (requestedUser.isAdmin()) {
+            return authenticateAdmin(requestedUser, loginRequestDto.isRememberMe());
+        } else {
+            return authenticateUser(requestedUser, loginRequestDto);
+        }
+
+        try {
+            if (requestedUser.isAdmin()) {
+                if (!requestedUser.isAccountNonLocked()) {
+                    throw new AdminBlockedException(requestedUser);
+                }
+                if (requestedUser.isBlockedBefore()) {
+                    requestedUser.setPassAttempts(3);
+                }
+            }
+
+            Authentication auth = authenticationManager
+                    .authenticate(new UsernamePasswordAuthenticationToken(
+                            loginRequestDto.getUsernameOrEmail(),
+                            loginRequestDto.getPassword()));
+
+            SecurityContextHolder.getContext().setAuthentication(auth);
+
+            if (requestedUser.isAdmin()) {
+                requestedUser.setPassAttempts(3);
+                requestedUser.setBlockedBefore(false);
+            }
+            userRepository.save(requestedUser);
+//            requestedUser = (User) auth.getPrincipal();
+            String accessToken = jwtService.generateAccessToken(requestedUser);
+            String refreshToken = jwtService.generateRefreshToken(requestedUser, loginRequestDto.isRememberMe());
+            Optional<Token> token = tokenRepository.findTokenByUserId(requestedUser.getId());
+            if (token.isPresent()) {
+                tokenService.updateRefreshToken(requestedUser, passwordEncoder.encode(refreshToken));
+            } else {
+                tokenService.saveRefreshToken(requestedUser, passwordEncoder.encode(refreshToken), loginRequestDto.isRememberMe());
+            }
+
+            return ResponseEntity.ok(new JwtResponseDto(accessToken,
+                    refreshToken,
+                    requestedUser.getUsername(),
+                    requestedUser.getEmail(),
+                    requestedUser.getRole().getName().name().split("_")[1].toLowerCase()));
+        } catch (AuthenticationException e) {
+            if (requestedUser.isAdmin()) {
+                handleAdminWrongPassword(requestedUser);
+            }
+            throw e;
+        }
+    }
+
+    private ResponseEntity<JwtResponseDto> authenticateAdmin(User admin, boolean rememberMe) {
+        if (!admin.isAccountNonLocked()) {
+            throw new AdminBlockedException(admin);
+        }
+        if (admin.isBlockedBefore()) {
+            admin.setPassAttempts(3);
+        }
+        try {
+            Authentication auth = authenticationManager
+                    .authenticate(new UsernamePasswordAuthenticationToken(
+                            admin.getUsername(),
+                            admin.getPassword()));
+
+            SecurityContextHolder.getContext().setAuthentication(auth);
+        } catch (AuthenticationException e) {
+            handleAdminWrongPassword(admin);
+            throw e;
+        }
+
+        admin.setPassAttempts(3);
+        admin.setBlockedBefore(false);
+        userRepository.save(admin);
+        return generateResponseWithTokens(admin, rememberMe);
+    }
+
+    private ResponseEntity<JwtResponseDto> authenticateUser(User user, LoginRequestDto loginRequestDto) {
         Authentication auth = authenticationManager
                 .authenticate(new UsernamePasswordAuthenticationToken(
                         loginRequestDto.getUsernameOrEmail(),
                         loginRequestDto.getPassword()));
-        User currentUser = (User) userService.loadUserByUsername(loginRequestDto.getUsernameOrEmail());
+
         SecurityContextHolder.getContext().setAuthentication(auth);
+        return generateResponseWithTokens(user, loginRequestDto.isRememberMe());
+    }
 
-        String accessToken = jwtService.generateAccessToken((UserDetails) auth.getPrincipal());
-        String refreshToken = jwtService.generateRefreshToken((UserDetails) auth.getPrincipal(), loginRequestDto.isRememberMe());
-        Optional<Token> token = tokenRepository.findTokenByUserId(currentUser.getId());
+    private ResponseEntity<JwtResponseDto> generateResponseWithTokens(User user, boolean rememberMe) {
+        String accessToken = jwtService.generateAccessToken(user);
+        String refreshToken = jwtService.generateRefreshToken(user, rememberMe);
+        Optional<Token> token = tokenRepository.findTokenByUserId(user.getId());
         if (token.isPresent()) {
-            tokenService.updateRefreshToken(currentUser, passwordEncoder.encode(refreshToken));
+            tokenService.updateRefreshToken(user, passwordEncoder.encode(refreshToken));
         } else {
-            tokenService.saveRefreshToken(currentUser, passwordEncoder.encode(refreshToken), loginRequestDto.isRememberMe());
+            tokenService.saveRefreshToken(user, passwordEncoder.encode(refreshToken), rememberMe);
         }
-
-        User user = (User) auth.getPrincipal();
 
         return ResponseEntity.ok(new JwtResponseDto(accessToken,
                 refreshToken,
@@ -159,6 +240,22 @@ public class AuthenticationService {
                         feedbackRepository.save(x);
                     }
                 });
+    }
+
+    private void handleAdminWrongPassword(User admin) {
+        int passAttemptsLeft = admin.getPassAttempts() - 1;
+        admin.setPassAttempts(passAttemptsLeft);
+        if (passAttemptsLeft == 0) {
+            if (admin.isBlockedBefore()) {
+                admin.setLockEndTime(LocalDateTime.now().plus(100, ChronoUnit.YEARS));
+            } else {
+                admin.setLockEndTime(LocalDateTime.now().plus(1, ChronoUnit.HOURS));
+                admin.setBlockedBefore(true);
+            }
+            userRepository.save(admin);
+            throw new AdminBlockedException(admin);
+        }
+        userRepository.save(admin);
     }
 
 }

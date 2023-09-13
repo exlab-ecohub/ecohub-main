@@ -12,7 +12,8 @@ VALUES ('PLASTIC'),
        ('APPLIANCES'),
        ('HAZARDOUS_WASTE'),
        ('METAL'),
-       ('CLOTHES')
+       ('CLOTHES'),
+       ('SECOND_LIFE')
 ON CONFLICT DO NOTHING;
 
 INSERT INTO RECYCLING_POINTS (name, website, address, latitude, longitude, displayed)

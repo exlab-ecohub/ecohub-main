@@ -8,5 +8,6 @@ public enum ERecyclableType {
     APPLIANCES,
     HAZARDOUS_WASTE,
     METAL,
-    CLOTHES
+    CLOTHES,
+    SECOND_LIFE
 }

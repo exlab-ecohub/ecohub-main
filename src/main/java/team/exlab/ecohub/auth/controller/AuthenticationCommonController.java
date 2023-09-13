@@ -26,7 +26,7 @@ public class AuthenticationCommonController {
 
     @PostMapping("/login")
     public ResponseEntity<JwtResponseDto> authenticateUser(@Valid @RequestBody LoginRequestDto loginRequestDto) {
-        return authenticationService.authenticateUser(loginRequestDto);
+        return authenticationService.authenticate(loginRequestDto);
     }
 
     @PostMapping("/register")

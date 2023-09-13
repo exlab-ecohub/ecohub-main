@@ -4,6 +4,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.security.SignatureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -25,7 +26,8 @@ public class ErrorHandler {
         );
     }
 
-    @ExceptionHandler({UserNotFoundException.class, RecyclingPointNotFoundException.class, NoSuchElementException.class, FeedbackNotFoundException.class})
+    @ExceptionHandler({UserNotFoundException.class, UsernameNotFoundException.class,
+            RecyclingPointNotFoundException.class, NoSuchElementException.class, FeedbackNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundExceptions(final RuntimeException e) {
         return new ErrorResponse(
@@ -33,7 +35,7 @@ public class ErrorHandler {
         );
     }
 
-    @ExceptionHandler({AuthenticationException.class, JwtTokenException.class,
+    @ExceptionHandler({AuthenticationException.class, AdminBlockedException.class, JwtTokenException.class,
             JwtException.class, SignatureException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleBadCredentialsExceptions(final RuntimeException e) {

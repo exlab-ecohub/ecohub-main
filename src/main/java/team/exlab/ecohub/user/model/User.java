@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
@@ -35,12 +36,20 @@ public class User implements UserDetails {
     @ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id", referencedColumnName = "id")
     private Role role;
+    @Column(name = "pass_attempts")
+    private int passAttempts;
+    @Column(name = "blocked_before")
+    private boolean blockedBefore;
+    @Column(name = "lock_end_time")
+    private LocalDateTime lockEndTime;
 
     public User(String username, String password, String email, Role role) {
         this.username = username;
         this.email = email;
         this.password = password;
         this.role = role;
+        this.passAttempts = 3;
+        this.blockedBefore = false;
     }
 
     @Override
@@ -55,7 +64,8 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        return lockEndTime == null || lockEndTime.isBefore(LocalDateTime.now());
+//        return true;
     }
 
     @Override
@@ -79,5 +89,9 @@ public class User implements UserDetails {
     @Override
     public int hashCode() {
         return getClass().hashCode();
+    }
+
+    public boolean isAdmin(){
+        return role.getName().equals(ERole.ROLE_ADMIN);
     }
 }
