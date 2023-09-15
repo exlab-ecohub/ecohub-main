@@ -50,68 +50,24 @@ public class AuthenticationService {
     public ResponseEntity<JwtResponseDto> authenticate(LoginRequestDto loginRequestDto) {
         User requestedUser = (User) userService.loadUserByUsername(loginRequestDto.getUsernameOrEmail());
         if (requestedUser.isAdmin()) {
-            return authenticateAdmin(requestedUser, loginRequestDto.isRememberMe());
+            return authenticateAdmin(requestedUser, loginRequestDto);
         } else {
             return authenticateUser(requestedUser, loginRequestDto);
         }
-
-        try {
-            if (requestedUser.isAdmin()) {
-                if (!requestedUser.isAccountNonLocked()) {
-                    throw new AdminBlockedException(requestedUser);
-                }
-                if (requestedUser.isBlockedBefore()) {
-                    requestedUser.setPassAttempts(3);
-                }
-            }
-
-            Authentication auth = authenticationManager
-                    .authenticate(new UsernamePasswordAuthenticationToken(
-                            loginRequestDto.getUsernameOrEmail(),
-                            loginRequestDto.getPassword()));
-
-            SecurityContextHolder.getContext().setAuthentication(auth);
-
-            if (requestedUser.isAdmin()) {
-                requestedUser.setPassAttempts(3);
-                requestedUser.setBlockedBefore(false);
-            }
-            userRepository.save(requestedUser);
-//            requestedUser = (User) auth.getPrincipal();
-            String accessToken = jwtService.generateAccessToken(requestedUser);
-            String refreshToken = jwtService.generateRefreshToken(requestedUser, loginRequestDto.isRememberMe());
-            Optional<Token> token = tokenRepository.findTokenByUserId(requestedUser.getId());
-            if (token.isPresent()) {
-                tokenService.updateRefreshToken(requestedUser, passwordEncoder.encode(refreshToken));
-            } else {
-                tokenService.saveRefreshToken(requestedUser, passwordEncoder.encode(refreshToken), loginRequestDto.isRememberMe());
-            }
-
-            return ResponseEntity.ok(new JwtResponseDto(accessToken,
-                    refreshToken,
-                    requestedUser.getUsername(),
-                    requestedUser.getEmail(),
-                    requestedUser.getRole().getName().name().split("_")[1].toLowerCase()));
-        } catch (AuthenticationException e) {
-            if (requestedUser.isAdmin()) {
-                handleAdminWrongPassword(requestedUser);
-            }
-            throw e;
-        }
     }
 
-    private ResponseEntity<JwtResponseDto> authenticateAdmin(User admin, boolean rememberMe) {
+    private ResponseEntity<JwtResponseDto> authenticateAdmin(User admin, LoginRequestDto loginRequestDto) {
         if (!admin.isAccountNonLocked()) {
             throw new AdminBlockedException(admin);
         }
-        if (admin.isBlockedBefore()) {
+        if (admin.isBlockedBefore() && admin.getPassAttempts() == 0) {
             admin.setPassAttempts(3);
         }
         try {
             Authentication auth = authenticationManager
                     .authenticate(new UsernamePasswordAuthenticationToken(
-                            admin.getUsername(),
-                            admin.getPassword()));
+                            loginRequestDto.getUsernameOrEmail(),
+                            loginRequestDto.getPassword()));
 
             SecurityContextHolder.getContext().setAuthentication(auth);
         } catch (AuthenticationException e) {
@@ -122,7 +78,7 @@ public class AuthenticationService {
         admin.setPassAttempts(3);
         admin.setBlockedBefore(false);
         userRepository.save(admin);
-        return generateResponseWithTokens(admin, rememberMe);
+        return generateResponseWithTokens(admin, loginRequestDto.isRememberMe());
     }
 
     private ResponseEntity<JwtResponseDto> authenticateUser(User user, LoginRequestDto loginRequestDto) {

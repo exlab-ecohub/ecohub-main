@@ -3,6 +3,9 @@ package team.exlab.ecohub.feedback.dto;
 import team.exlab.ecohub.feedback.model.Feedback;
 
 public class FeedbackMapper {
+    private FeedbackMapper() {
+    }
+
     public static FeedbackDto toDto(Feedback feedback) {
         return FeedbackDto.builder()
                 .id(feedback.getId())

@@ -65,7 +65,6 @@ public class User implements UserDetails {
     @Override
     public boolean isAccountNonLocked() {
         return lockEndTime == null || lockEndTime.isBefore(LocalDateTime.now());
-//        return true;
     }
 
     @Override
@@ -91,7 +90,7 @@ public class User implements UserDetails {
         return getClass().hashCode();
     }
 
-    public boolean isAdmin(){
+    public boolean isAdmin() {
         return role.getName().equals(ERole.ROLE_ADMIN);
     }
 }

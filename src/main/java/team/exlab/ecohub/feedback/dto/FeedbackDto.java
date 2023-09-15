@@ -11,6 +11,7 @@ import team.exlab.ecohub.feedback.model.ResponseStatus;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
@@ -22,6 +23,8 @@ public class FeedbackDto {
     private Long id;
     @NotBlank(message = "name is mandatory and can not be empty!")
     @Size(max = 30, message = "size should be less than 30")
+    @Pattern(regexp = "[0-9а-яёА-ЯЁa-zA-Z-_ ]{2,30}",
+            message = "name must meet requirements")
     private String name;
     @NotBlank(message = "email is mandatory and can not be empty!")
     @Size(min = 5, max = 50, message = "size should be between 5 an 50 characters")
@@ -29,6 +32,8 @@ public class FeedbackDto {
     private String email;
     private MessageTopic messageTopic;
     @Size(max = 500, message = "message should not be greater than 500 characters")
+    @Pattern(regexp = "[0-9а-яёА-ЯЁa-zA-Z<>{}\\[\\]()?!,.:;'/|\"@№#$%^&*\\-_ +=`~]{1,500}",
+            message = "message content must meet requirements")
     private String messageContent;
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME, pattern = "yyyy-MM-dd HH:mm")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")

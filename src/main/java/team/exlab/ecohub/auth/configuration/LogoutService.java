@@ -18,7 +18,6 @@ import javax.servlet.http.HttpServletResponse;
 @Service
 @RequiredArgsConstructor
 public class LogoutService implements LogoutHandler {
-
     private final TokenService tokenService;
     private final UserRepository userRepository;
     private final JwtService jwtService;
@@ -31,7 +30,7 @@ public class LogoutService implements LogoutHandler {
             String username;
             try {
                 username = jwtService.getUserNameFromJwt(accessToken);
-            } catch (RuntimeException e){
+            } catch (RuntimeException e) {
                 throw new JwtTokenException(e.getMessage(), e);
             }
             User user = userRepository.findUserByUsername(username).orElseThrow(() ->

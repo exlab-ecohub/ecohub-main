@@ -10,6 +10,6 @@ public class AdminBlockedException extends RuntimeException {
     public AdminBlockedException(User admin) {
         super(String.format("Admin with username %s is blocked %s", admin.getUsername(),
                 Duration.between(LocalDateTime.now(), admin.getLockEndTime())
-                .getSeconds() > 3600 ? "forever. Please contact your boss" : "for one hour"));
+                        .getSeconds() > 3600 ? "permanently. Please contact the site administration" : "for one hour"));
     }
 }

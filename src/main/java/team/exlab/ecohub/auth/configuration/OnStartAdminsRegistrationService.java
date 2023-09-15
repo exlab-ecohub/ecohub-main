@@ -42,8 +42,8 @@ public class OnStartAdminsRegistrationService implements InitializingBean {
                     passwordEncoder.encode(firstAdminPassword),
                     null,
                     roleRepository
-                    .findRoleByName(ERole.ROLE_ADMIN)
-                    .orElseThrow(() -> new RuntimeException("Error, Role ADMIN is not found")));
+                            .findRoleByName(ERole.ROLE_ADMIN)
+                            .orElseThrow(() -> new RuntimeException("Error, Role ADMIN is not found")));
             userRepository.save(admin);
         }
     }
