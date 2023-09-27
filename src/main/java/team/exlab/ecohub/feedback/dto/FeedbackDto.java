@@ -31,6 +31,7 @@ public class FeedbackDto {
     @Email(message = "provide a valid email", regexp = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*@[^-][A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$")
     private String email;
     private MessageTopic messageTopic;
+    @NotBlank(message = "message is mandatory and can not be empty!")
     @Size(max = 500, message = "message should not be greater than 500 characters")
     @Pattern(regexp = "[0-9а-яёА-ЯЁa-zA-Z<>{}\\[\\]()?!,.:;'/|\"@№#$%^&*\\-_ +=`~]{1,500}",
             message = "message content must meet requirements")

@@ -29,8 +29,9 @@ public class AdminFeedbackController {
     }
 
     @PostMapping("/feedbacks/{id}")
-    public FeedbackDto makeResponse(@Valid @RequestBody AdminResponseDto adminResponseDto) {
-        return service.createResponseToFeedback(adminResponseDto);
+    public FeedbackDto makeResponse(@PathVariable Long id,
+                                    @Valid @RequestBody AdminResponseDto adminResponseDto) {
+        return service.createResponseToFeedback(id, adminResponseDto);
     }
 
 }

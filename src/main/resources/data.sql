@@ -1,3 +1,4 @@
+;
 -- INSERT INTO ROLES (name)
 -- VALUES ('ROLE_SUPERADMIN'),
 --        ('ROLE_ADMIN'),
@@ -1014,4 +1015,3 @@
 --        (107,6),
 --        (108,6)
 -- ON CONFLICT DO NOTHING;
--- ;

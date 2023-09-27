@@ -42,13 +42,13 @@ CREATE TABLE IF NOT EXISTS TOKENS
 CREATE TABLE IF NOT EXISTS FEEDBACKS
 (
     id               serial NOT NULL,
-    user_id          bigint REFERENCES USERS (id) ON DELETE CASCADE,
+    user_id          bigint REFERENCES USERS (id),
     name             character varying,
     email            character varying,
     message_topic    character varying,
     message_content  text,
     message_time     timestamp,
-    admin_id         bigint REFERENCES USERS (id) ON DELETE CASCADE,
+    admin_id         bigint REFERENCES USERS (id),
     response_content text,
     response_time    timestamp,
     response_status  character varying,

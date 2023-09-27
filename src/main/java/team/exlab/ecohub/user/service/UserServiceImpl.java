@@ -52,25 +52,32 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     @Transactional
     public AdminDto getAdminById(Long adminId) {
-        return UserMapper.toAdminDto(
-                userRepository.findById(adminId)
-                        .orElseThrow(() -> new AdminNotFoundException(adminId))
-        );
+        User user = userRepository.findById(adminId)
+                .orElseThrow(() -> new AdminNotFoundException(adminId));
+        if (!user.isAdmin()) {
+            throw new AdminNotFoundException(adminId);
+        }
+        return UserMapper.toAdminDto(user);
     }
 
     @Override
     @Transactional
     public void changeAdminPassword(Long adminId, PasswordChangeDto passwordDto) {
-        User admin = userRepository.findById(adminId).orElseThrow(
-                () -> new AdminNotFoundException(adminId));
-        admin.setPassword(passwordEncoder.encode(passwordDto.getNewPassword()));
-        userRepository.save(admin);
+        User user = userRepository.findById(adminId)
+                .orElseThrow(() -> new AdminNotFoundException(adminId));
+        if (!user.isAdmin()) {
+            throw new AdminNotFoundException(adminId);
+        }
+        user.setPassword(passwordEncoder.encode(passwordDto.getNewPassword()));
+        userRepository.save(user);
     }
 
     @Override
     @Transactional
     public void deleteAdmin(Long adminId) {
-        if (!userRepository.existsById(adminId)) {
+        User user = userRepository.findById(adminId)
+                .orElseThrow(() -> new AdminNotFoundException(adminId));
+        if (!user.isAdmin()) {
             throw new AdminNotFoundException(adminId);
         }
         userRepository.deleteById(adminId);
@@ -79,26 +86,26 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     @Transactional
     public void blockAdmin(Long adminId) {
-        User admin = userRepository.findById(adminId).orElseThrow(
+        User user = userRepository.findById(adminId).orElseThrow(
                 () -> new AdminNotFoundException(adminId));
-        if (!admin.isAdmin()) {
+        if (!user.isAdmin()) {
             throw new AdminNotFoundException(adminId);
         }
-        admin.setLockEndTime(LocalDateTime.now().plus(100, ChronoUnit.YEARS));
-        userRepository.save(admin);
+        user.setLockEndTime(LocalDateTime.now().plus(100, ChronoUnit.YEARS));
+        userRepository.save(user);
     }
 
     @Override
     @Transactional
     public void unblockAdmin(Long adminId) {
-        User admin = userRepository.findById(adminId).orElseThrow(
+        User user = userRepository.findById(adminId).orElseThrow(
                 () -> new AdminNotFoundException(adminId));
-        if (!admin.isAdmin()) {
+        if (!user.isAdmin()) {
             throw new AdminNotFoundException(adminId);
         }
-        admin.setLockEndTime(LocalDateTime.now().minus(1, ChronoUnit.HOURS));
-        admin.setBlockedBefore(false);
-        admin.setPassAttempts(3);
-        userRepository.save(admin);
+        user.setLockEndTime(LocalDateTime.now().minus(1, ChronoUnit.HOURS));
+        user.setBlockedBefore(false);
+        user.setPassAttempts(3);
+        userRepository.save(user);
     }
 }

@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface FeedbackService {
 
-    FeedbackDto createResponseToFeedback(AdminResponseDto adminResponseDto);
+    FeedbackDto createResponseToFeedback(Long feedbackId, AdminResponseDto adminResponseDto);
 
     List<FeedbackDto> getFeedbacks(ResponseStatus responseStatus, MessageTopic messageTopic);
 

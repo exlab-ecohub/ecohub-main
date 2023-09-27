@@ -10,10 +10,10 @@ import javax.validation.constraints.Size;
 @Setter
 public class LoginRequestDto {
     @NotNull
-    @Size(min = 5, max = 100)
+    @Size(min = 6, max = 15)
     private String usernameOrEmail;
     @NotNull
-    @Size(min = 10, max = 100)
+    @Size(min = 8, max = 20)
     private String password;
     private boolean rememberMe;
 }

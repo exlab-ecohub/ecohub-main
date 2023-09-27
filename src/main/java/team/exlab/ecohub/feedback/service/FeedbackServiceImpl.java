@@ -51,9 +51,9 @@ public class FeedbackServiceImpl implements FeedbackService {
 
     @Override
     @Transactional
-    public FeedbackDto createResponseToFeedback(AdminResponseDto adminResponseDto) {
+    public FeedbackDto createResponseToFeedback(Long feedbackId, AdminResponseDto adminResponseDto) {
         User admin = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Feedback feedbackForAnswer = feedbackRepository.findById(adminResponseDto.getId()).orElseThrow(() -> new FeedbackNotFoundException(adminResponseDto.getId()));
+        Feedback feedbackForAnswer = feedbackRepository.findById(feedbackId).orElseThrow(() -> new FeedbackNotFoundException(feedbackId));
         feedbackForAnswer.setAdmin(admin);
         feedbackForAnswer.setResponseStatus(ResponseStatus.CLOSED);
         feedbackForAnswer.setResponseContent(adminResponseDto.getResponseContent());

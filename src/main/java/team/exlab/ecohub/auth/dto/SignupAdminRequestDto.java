@@ -12,7 +12,7 @@ import javax.validation.constraints.Size;
 public class SignupAdminRequestDto {
     @NotBlank(message = "username is mandatory and can not be empty!")
     @Size(min = 6, max = 15)
-    @Pattern(regexp = "(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z-_]{6,15}",
+    @Pattern(regexp = "[0-9a-zA-Z-_]{6,15}",
             message = "username must meet security requirements")
     private String username;
     @NotBlank(message = "password is mandatory and can not be empty!")

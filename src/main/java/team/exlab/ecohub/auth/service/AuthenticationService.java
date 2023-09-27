@@ -154,6 +154,7 @@ public class AuthenticationService {
             tokenService.updateRefreshToken(user, passwordEncoder.encode(refreshToken));
 
             try {
+                response.setHeader("content-type", "application/json");
                 new ObjectMapper().writeValue(response.getOutputStream(), new JwtResponseDto(accessToken,
                         refreshToken,
                         user.getUsername(),
