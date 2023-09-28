@@ -190,7 +190,7 @@ public class AuthenticationService {
     }
 
     private void updateFeedbacksWithNewUser(User user) {
-        feedbackRepository.findAllByEmail(user.getEmail())
+        feedbackRepository.findAllByEmailOrderById(user.getEmail())
                 .forEach(x -> {
                     if (x.getUser() == null) {
                         x.setUser(user);

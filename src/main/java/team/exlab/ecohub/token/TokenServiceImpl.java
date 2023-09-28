@@ -6,6 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 import team.exlab.ecohub.exception.UserNotFoundException;
 import team.exlab.ecohub.user.model.User;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class TokenServiceImpl implements TokenService {
@@ -41,10 +43,12 @@ public class TokenServiceImpl implements TokenService {
     @Override
     @Transactional
     public void revokeRefreshToken(User user) {
-        Token validUserToken = tokenRepository.findTokenByUserId(user.getId())
-                .orElseThrow(() -> new UserNotFoundException(user.getUsername()));
-        validUserToken.setExpired(true);
-        validUserToken.setRevoked(true);
-        tokenRepository.save(validUserToken);
+        Optional<Token> userToken = tokenRepository.findTokenByUserId(user.getId());
+        if (userToken.isPresent()) {
+            Token token = userToken.get();
+            token.setExpired(true);
+            token.setRevoked(true);
+            tokenRepository.save(token);
+        }
     }
 }

@@ -11,13 +11,13 @@ import java.util.Optional;
 
 @Repository
 public interface FeedbackRepository extends JpaRepository<Feedback, Long> {
-    List<Feedback> findAllByResponseStatus(ResponseStatus responseStatus);
+    List<Feedback> findAllByResponseStatusOrderById(ResponseStatus responseStatus);
 
-    List<Feedback> findAllByMessageTopic(MessageTopic messageTopic);
+    List<Feedback> findAllByMessageTopicOrderById(MessageTopic messageTopic);
 
-    List<Feedback> findAllByResponseStatusAndMessageTopic(ResponseStatus responseStatus, MessageTopic messageTopic);
+    List<Feedback> findAllByResponseStatusAndMessageTopicOrderById(ResponseStatus responseStatus, MessageTopic messageTopic);
 
-    List<Feedback> findAllByEmail(String email);
+    List<Feedback> findAllByEmailOrderById(String email);
 
     Optional<Feedback> findFeedbackByEmailAndId(String email, Long feedbackId);
 }

@@ -16,6 +16,7 @@ import team.exlab.ecohub.user.model.User;
 import team.exlab.ecohub.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -89,7 +90,7 @@ public class FeedbackServiceImpl implements FeedbackService {
     @Transactional
     public List<FeedbackDto> getAllFeedbacksForUser() {
         User currentUser = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        return feedbackRepository.findAllByEmail(currentUser.getEmail()).stream()
+        return feedbackRepository.findAllByEmailOrderById(currentUser.getEmail()).stream()
                 .map(FeedbackMapper::toDto)
                 .collect(Collectors.toList());
     }
@@ -99,21 +100,22 @@ public class FeedbackServiceImpl implements FeedbackService {
     private List<FeedbackDto> getAllFeedbacks() {
         return feedbackRepository.findAll().stream()
                 .map(FeedbackMapper::toDto)
+                .sorted(Comparator.comparing(FeedbackDto::getId))
                 .collect(Collectors.toList());
     }
 
     private List<FeedbackDto> getFeedbacksByStatus(ResponseStatus status) {
-        return feedbackRepository.findAllByResponseStatus(status).stream().map(FeedbackMapper::toDto).collect(Collectors.toList());
+        return feedbackRepository.findAllByResponseStatusOrderById(status).stream().map(FeedbackMapper::toDto).collect(Collectors.toList());
     }
 
     private List<FeedbackDto> getFeedbacksByMessageTopic(MessageTopic topic) {
-        return feedbackRepository.findAllByMessageTopic(topic).stream()
+        return feedbackRepository.findAllByMessageTopicOrderById(topic).stream()
                 .map(FeedbackMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     private List<FeedbackDto> getFeedbacksByStatusAndTopic(ResponseStatus status, MessageTopic topic) {
-        return feedbackRepository.findAllByResponseStatusAndMessageTopic(status, topic).stream()
+        return feedbackRepository.findAllByResponseStatusAndMessageTopicOrderById(status, topic).stream()
                 .map(FeedbackMapper::toDto)
                 .collect(Collectors.toList());
     }

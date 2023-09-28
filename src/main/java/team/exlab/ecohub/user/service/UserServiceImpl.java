@@ -8,6 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import team.exlab.ecohub.exception.AdminNotFoundException;
+import team.exlab.ecohub.token.TokenService;
 import team.exlab.ecohub.user.UserMapper;
 import team.exlab.ecohub.user.dto.AdminDto;
 import team.exlab.ecohub.user.dto.PasswordChangeDto;
@@ -26,6 +27,7 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService, UserDetailsService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final TokenService tokenService;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -70,6 +72,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         }
         user.setPassword(passwordEncoder.encode(passwordDto.getNewPassword()));
         userRepository.save(user);
+        tokenService.revokeRefreshToken(user);
     }
 
     @Override
