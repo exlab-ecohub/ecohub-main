@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-@RequestMapping("/swagger")
+@RequestMapping("/swagger-download")
 @RequiredArgsConstructor
 public class SwaggerController {
     private final SwaggerService swaggerService;
