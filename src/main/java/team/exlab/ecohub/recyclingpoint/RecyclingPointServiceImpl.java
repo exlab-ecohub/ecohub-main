@@ -7,8 +7,6 @@ import org.springframework.transaction.annotation.Transactional;
 import team.exlab.ecohub.exception.RecyclingPointNotFoundException;
 import team.exlab.ecohub.pageable.OffsetLimitPageable;
 import team.exlab.ecohub.recyclingpoint.dto.RecyclingPointDto;
-import team.exlab.ecohub.recyclingpoint.dto.RecyclingPointPartInfoDto;
-import team.exlab.ecohub.recyclingpoint.model.ERecyclableType;
 import team.exlab.ecohub.recyclingpoint.model.RecyclableType;
 import team.exlab.ecohub.recyclingpoint.model.RecyclingPoint;
 
@@ -23,11 +21,20 @@ import java.util.stream.Collectors;
 public class RecyclingPointServiceImpl implements RecyclingPointService {
     private final RecyclingPointRepository pointRepository;
     private final RecyclableTypeRepository typeRepository;
+    private static final String WRONG_RECYCLABLE_TYPES = "Some of above recyclableTypes values are wrong=%s";
 
     @Override
     @Transactional
-    public List<RecyclingPointPartInfoDto> getPoints(Set<String> types, String displayed, Integer from, Integer size) {
+    public List<RecyclingPointDto> getPointsDto(Set<String> types, String displayed, Integer from, Integer size) {
+        List<RecyclingPoint> recyclingPoints = getRawPoints(types, displayed, from, size);
+        return recyclingPoints.stream()
+                .map(RecyclingPointMapper::toDto)
+                .collect(Collectors.toList());
+    }
+
+    private List<RecyclingPoint> getRawPoints(Set<String> types, String displayed, Integer from, Integer size) {
         List<RecyclingPoint> recyclingPoints;
+        from = from >= 1 ? from - 1 : from;
         size = size == 0 ? (int) pointRepository.count() - from : size;
         if (types == null || types.isEmpty()) {
             if (displayed.equals("null")) {
@@ -37,7 +44,10 @@ public class RecyclingPointServiceImpl implements RecyclingPointService {
             }
         } else {
             Set<RecyclableType> recyclableTypes = new HashSet<>();
-            types.forEach(type -> recyclableTypes.add(typeRepository.findByName(ERecyclableType.valueOf(type))));
+            types.forEach(type ->
+                    recyclableTypes.add(typeRepository.findByRusName(type).orElseThrow(() ->
+                            new IllegalArgumentException(
+                                    String.format(WRONG_RECYCLABLE_TYPES, types)))));
             if (displayed.equals("null")) {
                 recyclingPoints = pointRepository.findAllDistinctByRecyclableTypesInOrderById(recyclableTypes,
                         OffsetLimitPageable.of(from, size));
@@ -47,9 +57,7 @@ public class RecyclingPointServiceImpl implements RecyclingPointService {
                         OffsetLimitPageable.of(from, size));
             }
         }
-        return recyclingPoints.stream()
-                .map(RecyclingPointMapper::toPartInfoDto)
-                .collect(Collectors.toList());
+        return recyclingPoints;
     }
 
     @Override
@@ -63,7 +71,10 @@ public class RecyclingPointServiceImpl implements RecyclingPointService {
     @Transactional
     public RecyclingPointDto createPoint(RecyclingPointDto point) {
         Set<RecyclableType> types = new HashSet<>();
-        point.getRecyclableTypes().forEach(type -> types.add(typeRepository.findByName(ERecyclableType.valueOf(type))));
+        point.getRecyclableTypes().forEach(type ->
+                types.add(typeRepository.findByRusName(type).orElseThrow(() ->
+                        new IllegalArgumentException(
+                                String.format(WRONG_RECYCLABLE_TYPES, point.getRecyclableTypes())))));
         RecyclingPoint recyclingPoint = RecyclingPointMapper.toPoint(point, types);
         return RecyclingPointMapper.toDto(pointRepository.save(recyclingPoint));
     }
@@ -81,7 +92,9 @@ public class RecyclingPointServiceImpl implements RecyclingPointService {
         recyclingPoint.setWorkingHours(updatedPoint.getWorkingHours());
         recyclingPoint.setRecyclableTypes(
                 updatedPoint.getRecyclableTypes().stream()
-                        .map(type -> typeRepository.findByName(ERecyclableType.valueOf(type)))
+                        .map(type -> typeRepository.findByRusName(type).orElseThrow(() ->
+                                new IllegalArgumentException(
+                                        String.format(WRONG_RECYCLABLE_TYPES, updatedPoint.getRecyclableTypes()))))
                         .collect(Collectors.toSet())
         );
         recyclingPoint.setDisplayed(updatedPoint.isDisplayed());

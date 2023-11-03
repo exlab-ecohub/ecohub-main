@@ -5,18 +5,18 @@
 --        ('ROLE_USER')
 -- ON CONFLICT DO NOTHING;
 --
--- INSERT INTO RECYCLABLE_TYPES (name)
--- VALUES ('PLASTIC'),
---        ('PAPER'),
---        ('GLASS'),
---        ('BULKY_WASTE'),
---        ('APPLIANCES'),
---        ('HAZARDOUS_WASTE'),
---        ('METAL'),
---        ('CLOTHES'),
---        ('SECOND_LIFE'),
---        ('RAGS'),
---        ('SHOES')
+-- INSERT INTO RECYCLABLE_TYPES (name, rus_name)
+-- VALUES ('PLASTIC', 'пластик'),
+--        ('PAPER', 'бумага'),
+--        ('GLASS', 'стекло'),
+--        ('BULKY_WASTE', 'крупногабаритные отходы'),
+--        ('APPLIANCES', 'электронная и бытовая техника'),
+--        ('HAZARDOUS_WASTE', 'опасные отходы'),
+--        ('METAL', 'металл'),
+--        ('CLOTHES', 'одежда'),
+--        ('SECOND_LIFE', 'вторая жизнь'),
+--        ('RAGS', 'ветошь'),
+--        ('SHOES', 'обувь')
 -- ON CONFLICT DO NOTHING;
 --
 -- INSERT INTO RECYCLING_POINTS (name, website, address, phone_number, latitude, longitude, displayed)

@@ -19,4 +19,5 @@ public class RecyclableType {
     private Long id;
     @Enumerated(EnumType.STRING)
     private ERecyclableType name;
+    private String rusName;
 }

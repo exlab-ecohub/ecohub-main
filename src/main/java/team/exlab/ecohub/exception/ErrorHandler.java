@@ -2,6 +2,7 @@ package team.exlab.ecohub.exception;
 
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.security.SignatureException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -16,10 +17,12 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 @RestControllerAdvice
+@Slf4j
 public class ErrorHandler {
     @ExceptionHandler()
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleNotFoundException(final RuntimeException e) {
+    public ErrorResponse handleUnexpectedException(final RuntimeException e) {
+        log.warn("Unexpected exception: ", e);
         e.printStackTrace();
         return new ErrorResponse(
                 e.getMessage()
@@ -30,6 +33,7 @@ public class ErrorHandler {
             RecyclingPointNotFoundException.class, NoSuchElementException.class, FeedbackNotFoundException.class})
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleNotFoundExceptions(final RuntimeException e) {
+        log.warn("NotFoundException: ", e);
         return new ErrorResponse(
                 e.getMessage()
         );
@@ -39,6 +43,16 @@ public class ErrorHandler {
             JwtException.class, SignatureException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleBadCredentialsExceptions(final RuntimeException e) {
+        log.warn("Bad credentials exception: ", e);
+        return new ErrorResponse(
+                e.getMessage()
+        );
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleIllegalArgumentExceptions(final RuntimeException e) {
+        log.warn("IllegalArgumentException: ", e);
         return new ErrorResponse(
                 e.getMessage()
         );
@@ -48,6 +62,7 @@ public class ErrorHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public Map<String, String> handleValidationExceptions(
             MethodArgumentNotValidException ex) {
+        log.warn("Validation exception: ", ex);
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName = ((FieldError) error).getField();

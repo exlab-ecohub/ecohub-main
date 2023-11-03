@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import team.exlab.ecohub.recyclingpoint.RecyclingPointService;
 import team.exlab.ecohub.recyclingpoint.dto.RecyclingPointDto;
-import team.exlab.ecohub.recyclingpoint.dto.RecyclingPointPartInfoDto;
 
 import java.util.List;
 import java.util.Set;
@@ -16,11 +15,11 @@ public class RecyclingPointController {
     private final RecyclingPointService recyclingPointService;
 
     @GetMapping
-    public List<RecyclingPointPartInfoDto> getPoints(@RequestParam(required = false) Set<String> types,
+    public List<RecyclingPointDto> getPoints(@RequestParam(required = false) Set<String> types,
                                                      @RequestParam(required = false, defaultValue = "null") String displayed,
                                                      @RequestParam(required = false, defaultValue = "0") Integer from,
                                                      @RequestParam(required = false, defaultValue = "0") Integer size) {
-        return recyclingPointService.getPoints(types, displayed, from, size);
+        return recyclingPointService.getPointsDto(types, displayed, from, size);
     }
 
     @GetMapping("/{pointId}")

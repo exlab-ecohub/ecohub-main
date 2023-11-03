@@ -1,16 +1,15 @@
 package team.exlab.ecohub.recyclingpoint;
 
 import team.exlab.ecohub.recyclingpoint.dto.RecyclingPointDto;
-import team.exlab.ecohub.recyclingpoint.dto.RecyclingPointPartInfoDto;
 
 import java.util.List;
 import java.util.Set;
 
 public interface RecyclingPointService {
-    List<RecyclingPointPartInfoDto> getPoints(Set<String> types,
-                                              String displayed,
-                                              Integer from,
-                                              Integer size);
+    List<RecyclingPointDto> getPointsDto(Set<String> types,
+                                         String displayed,
+                                         Integer from,
+                                         Integer size);
 
     RecyclingPointDto getPoint(Long pointId);
 

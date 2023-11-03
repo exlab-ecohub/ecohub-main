@@ -1,7 +1,6 @@
 package team.exlab.ecohub.recyclingpoint;
 
 import team.exlab.ecohub.recyclingpoint.dto.RecyclingPointDto;
-import team.exlab.ecohub.recyclingpoint.dto.RecyclingPointPartInfoDto;
 import team.exlab.ecohub.recyclingpoint.model.RecyclableType;
 import team.exlab.ecohub.recyclingpoint.model.RecyclingPoint;
 
@@ -10,16 +9,6 @@ import java.util.stream.Collectors;
 
 public class RecyclingPointMapper {
     private RecyclingPointMapper() {
-    }
-
-    public static RecyclingPointPartInfoDto toPartInfoDto(RecyclingPoint recyclingPoint) {
-        return RecyclingPointPartInfoDto.builder()
-                .id(recyclingPoint.getId())
-                .name(recyclingPoint.getName())
-                .address(recyclingPoint.getAddress())
-                .phoneNumber(recyclingPoint.getPhoneNumber())
-                .website(recyclingPoint.getWebsite())
-                .displayed(recyclingPoint.isDisplayed()).build();
     }
 
     public static RecyclingPointDto toDto(RecyclingPoint recyclingPoint) {
@@ -32,7 +21,7 @@ public class RecyclingPointMapper {
                 .location(recyclingPoint.getLocation())
                 .workingHours(recyclingPoint.getWorkingHours())
                 .recyclableTypes(recyclingPoint.getRecyclableTypes().stream()
-                        .map(type -> type.getName().name())
+                        .map(RecyclableType::getRusName)
                         .collect(Collectors.toSet()))
                 .displayed(recyclingPoint.isDisplayed()).build();
     }
