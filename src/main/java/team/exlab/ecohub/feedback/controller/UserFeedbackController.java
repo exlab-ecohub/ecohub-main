@@ -15,9 +15,8 @@ public class UserFeedbackController {
 
 
     @PostMapping("/feedbacks")
-    @Valid
-    public FeedbackDto createFeedback(@Valid @RequestBody FeedbackDto userFeedback) {
-        return service.createFeedback(userFeedback);
+    public void createFeedback(@Valid @RequestBody FeedbackDto userFeedback) {
+        service.createFeedback(userFeedback);
     }
 
     @GetMapping("/user/feedbacks")
@@ -27,6 +26,6 @@ public class UserFeedbackController {
 
     @GetMapping("/user/feedbacks/{id}")
     public FeedbackDto getFeedback(@PathVariable Long id) {
-        return service.getOneFeedbackForUser(id);
+        return service.getFeedbackForUser(id);
     }
 }

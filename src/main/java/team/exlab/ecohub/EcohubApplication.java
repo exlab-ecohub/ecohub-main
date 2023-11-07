@@ -13,20 +13,7 @@ import java.util.Map;
 
 @SpringBootApplication
 public class EcohubApplication {
-    private static String superAdminPassword;
-    private static String firstAdminPassword;
-
     public static void main(String[] args) {
-//        superAdminPassword = args[0];
-//        firstAdminPassword = args[1];
         SpringApplication.run(EcohubApplication.class, args);
-    }
-
-    public static String getSuperAdminPassword() {
-        return superAdminPassword;
-    }
-
-    public static String getFirstAdminPassword() {
-        return firstAdminPassword;
     }
 }

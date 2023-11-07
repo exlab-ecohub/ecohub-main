@@ -15,10 +15,10 @@ import org.springframework.stereotype.Service;
 import team.exlab.ecohub.auth.configuration.jwt.JwtService;
 import team.exlab.ecohub.auth.dto.*;
 import team.exlab.ecohub.exception.UserNotFoundException;
+import team.exlab.ecohub.feedback.repository.FeedbackRepository;
 import team.exlab.ecohub.token.TokenRepository;
 import team.exlab.ecohub.token.TokenService;
 import team.exlab.ecohub.user.model.ERole;
-import team.exlab.ecohub.user.model.Role;
 import team.exlab.ecohub.user.model.User;
 import team.exlab.ecohub.user.repository.RoleRepository;
 import team.exlab.ecohub.user.repository.UserRepository;
@@ -36,6 +36,7 @@ public class AuthenticationService {
 
     private final TokenService tokenService;
     private final UserRepository userRepository;
+    private final FeedbackRepository feedbackRepository;
     private final UserDetailsService userService;
     private final RoleRepository roleRepository;
     private final TokenRepository tokenRepository;
@@ -60,7 +61,8 @@ public class AuthenticationService {
         return ResponseEntity.ok(new JwtResponseDto(accessToken,
                 refreshToken,
                 user.getUsername(),
-                user.getEmail()));
+                user.getEmail(),
+                user.getRole().getName().name().split("_")[1].toLowerCase()));
     }
 
     public ResponseEntity<MessageResponseDto> registerUser(SignupUserRequestDto signupUserRequestDto) {
@@ -78,15 +80,15 @@ public class AuthenticationService {
 
         User user = new User(signupUserRequestDto.getUsername(),
                 passwordEncoder.encode(signupUserRequestDto.getPassword()),
-                signupUserRequestDto.getEmail()
+                signupUserRequestDto.getEmail(),
+                roleRepository
+                        .findRoleByName(ERole.ROLE_USER)
+                        .orElseThrow(() -> new RuntimeException("Error, Role USER is not found"))
         );
 
-        Role role = roleRepository
-                .findRoleByName(ERole.ROLE_USER)
-                .orElseThrow(() -> new RuntimeException("Error, Role USER is not found"));
+        user = userRepository.save(user);
+        updateFeedbacksWithNewUser(user);
 
-        user.setRole(role);
-        userRepository.save(user);
         return ResponseEntity.ok(
                 new MessageResponseDto(
                         String.format("User %s successfully created", user.getUsername())));
@@ -112,7 +114,8 @@ public class AuthenticationService {
                 new ObjectMapper().writeValue(response.getOutputStream(), new JwtResponseDto(accessToken,
                         refreshToken,
                         user.getUsername(),
-                        user.getEmail()));
+                        user.getEmail(),
+                        user.getRole().getName().name().split("_")[1].toLowerCase()));
             } catch (IOException e) {
                 log.warn("Error while writing response with new tokens", e);
             }
@@ -129,17 +132,26 @@ public class AuthenticationService {
 
         User admin = new User(signupAdminRequestDto.getUsername(),
                 passwordEncoder.encode(signupAdminRequestDto.getPassword()),
-                null
+                null,
+                roleRepository
+                        .findRoleByName(ERole.ROLE_ADMIN)
+                        .orElseThrow(() -> new RuntimeException("Error, Role ADMIN is not found"))
         );
 
-        Role role = roleRepository
-                .findRoleByName(ERole.ROLE_ADMIN)
-                .orElseThrow(() -> new RuntimeException("Error, Role USER is not found"));
-
-        admin.setRole(role);
         userRepository.save(admin);
         return ResponseEntity.ok(
                 new MessageResponseDto(
                         String.format("Admin %s successfully created", admin.getUsername())));
     }
+
+    private void updateFeedbacksWithNewUser(User user) {
+        feedbackRepository.findAllByEmail(user.getEmail())
+                .forEach(x -> {
+                    if (x.getUser() == null) {
+                        x.setUser(user);
+                        feedbackRepository.save(x);
+                    }
+                });
+    }
+
 }
