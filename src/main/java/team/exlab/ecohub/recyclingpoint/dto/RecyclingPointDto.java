@@ -12,13 +12,17 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.DayOfWeek;
-import java.util.Map;
-import java.util.Set;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @Builder
+
 public class RecyclingPointDto {
     private Long id;
     @NotBlank
@@ -33,8 +37,11 @@ public class RecyclingPointDto {
     private String website;
     @NotNull(message = "GPS coordinates required")
     private Location location;
-    private Map<DayOfWeek, WorkingHours> workingHours;
+    private String workingHoursAsString;
     @NotEmpty(message = "At least one recyclable type required")
     private Set<String> recyclableTypes;
     private boolean displayed;
+
+
+
 }

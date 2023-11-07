@@ -78,7 +78,7 @@ public class RecyclingPointServiceImpl implements RecyclingPointService {
         recyclingPoint.setPhoneNumber(updatedPoint.getPhoneNumber());
         recyclingPoint.setWebsite(updatedPoint.getWebsite());
         recyclingPoint.setLocation(updatedPoint.getLocation());
-        recyclingPoint.setWorkingHours(updatedPoint.getWorkingHours());
+        recyclingPoint.setWorkingHours(RecyclingPointMapper.convertWorkingHoursFromStringToMap(updatedPoint.getWorkingHoursAsString()));
         recyclingPoint.setRecyclableTypes(
                 updatedPoint.getRecyclableTypes().stream()
                         .map(type -> typeRepository.findByName(ERecyclableType.valueOf(type)))
