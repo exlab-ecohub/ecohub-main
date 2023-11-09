@@ -5,20 +5,18 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import team.exlab.ecohub.recyclingpoint.model.Location;
-import team.exlab.ecohub.recyclingpoint.model.WorkingHours;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.time.DayOfWeek;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @Builder
+
 public class RecyclingPointDto {
     private Long id;
     @NotBlank
@@ -33,8 +31,11 @@ public class RecyclingPointDto {
     private String website;
     @NotNull(message = "GPS coordinates required")
     private Location location;
-    private Map<DayOfWeek, WorkingHours> workingHours;
+    private String workingHours;
     @NotEmpty(message = "At least one recyclable type required")
     private Set<String> recyclableTypes;
     private boolean displayed;
+
+
+
 }

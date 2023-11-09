@@ -89,7 +89,7 @@ public class RecyclingPointServiceImpl implements RecyclingPointService {
         recyclingPoint.setPhoneNumber(updatedPoint.getPhoneNumber());
         recyclingPoint.setWebsite(updatedPoint.getWebsite());
         recyclingPoint.setLocation(updatedPoint.getLocation());
-        recyclingPoint.setWorkingHours(updatedPoint.getWorkingHours());
+        recyclingPoint.setWorkingHours(RecyclingPointMapper.workingHoursToMap(updatedPoint.getWorkingHours()));
         recyclingPoint.setRecyclableTypes(
                 updatedPoint.getRecyclableTypes().stream()
                         .map(type -> typeRepository.findByRusName(type).orElseThrow(() ->
