@@ -35,13 +35,14 @@ public class RecyclingPointMapper {
                 .location(recyclingPoint.getLocation())
                 .workingHours(workingHoursToString(recyclingPoint.getWorkingHours()))
                 .recyclableTypes(recyclingPoint.getRecyclableTypes().stream()
-                        .map(type -> type.getName().name())
+                        .map(RecyclableType::getRusName)
                         .collect(Collectors.toSet()))
                 .displayed(recyclingPoint.isDisplayed())
                 .build();
     }
 
-    public static RecyclingPoint toPoint(RecyclingPointDto recyclingPointDto, Set<RecyclableType> recyclableTypes) {
+    public static RecyclingPoint toPoint(RecyclingPointDto recyclingPointDto,
+                                         Set<RecyclableType> recyclableTypes) {
         return RecyclingPoint.builder()
                 .id(recyclingPointDto.getId())
                 .name(recyclingPointDto.getName())

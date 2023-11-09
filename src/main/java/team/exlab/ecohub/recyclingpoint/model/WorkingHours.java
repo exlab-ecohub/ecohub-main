@@ -6,14 +6,12 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.Embeddable;
 import java.time.LocalTime;
-import java.util.regex.Pattern;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Embeddable
-@ToString
 @EqualsAndHashCode
 public class WorkingHours {
     @DateTimeFormat(iso = DateTimeFormat.ISO.TIME, pattern = "HH:mm:ss")
