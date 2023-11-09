@@ -16,12 +16,12 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class RecyclingPointMapper {
-    private static final String regExpIncommingString = "((Пн|Вт|Ср|Чт|Пт|Сб|Вс)(-(Вт|Ср|Чт|Пт|Сб|Вс))?:\\s*([0-2][0-9]:[0-5][0-9]-[0-2][0-9]:[0-5][0-9])(,\\s*[0-2][0-9]:[0-5][0-9]-[0-2][0-9]:[0-5][0-9])?;\\s*){0,6}(Пн|Вт|Ср|Чт|Пт|Сб|Вс)(-(Вт|Ср|Чт|Пт|Сб|Вс))?:\\s*([0-2][0-9]:[0-5][0-9]-[0-2][0-9]:[0-5][0-9])(,\\s*[0-2][0-9]:[0-5][0-9]-[0-2][0-9]:[0-5][0-9])?\\.$";
-    private static final Map<String, DayOfWeek> dayOfWeekMap = Map.of("Пн", DayOfWeek.MONDAY, "Вт", DayOfWeek.TUESDAY, "Ср", DayOfWeek.WEDNESDAY, "Чт", DayOfWeek.THURSDAY, "Пт", DayOfWeek.FRIDAY, "Сб", DayOfWeek.SATURDAY, "Вс", DayOfWeek.SUNDAY);
-    private static final Map<DayOfWeek, String> dayOfWeekReverseMap = Map.of(DayOfWeek.MONDAY, "Пн", DayOfWeek.TUESDAY, "Вт", DayOfWeek.WEDNESDAY, "Ср", DayOfWeek.THURSDAY, "Чт", DayOfWeek.FRIDAY, "Пт", DayOfWeek.SATURDAY, "Сб", DayOfWeek.SUNDAY, "Вс");
-    private static final Pattern dayOrDaysPattern = Pattern.compile("(Пн|Вт|Ср|Чт|Пт|Сб|Вс)(-(Вт|Ср|Чт|Пт|Сб|Вс))?");
-    private static final Pattern workingTimePattern = Pattern.compile("([0-2][0-9]:[0-5][0-9]-[0-2][0-9]:[0-5][0-9])[,|\\.]");
-    private static final Pattern lunchTimePattern = Pattern.compile("(,\\s*[0-2][0-9]:[0-5][0-9]-[0-2][0-9]:[0-5][0-9])");
+    private static final String WORKING_HOURS_REGEXP = "((Пн|Вт|Ср|Чт|Пт|Сб|Вс)(-(Вт|Ср|Чт|Пт|Сб|Вс))?:\\s*([0-2][0-9]:[0-5][0-9]-[0-2][0-9]:[0-5][0-9])(,\\s*[0-2][0-9]:[0-5][0-9]-[0-2][0-9]:[0-5][0-9])?;\\s*){0,6}(Пн|Вт|Ср|Чт|Пт|Сб|Вс)(-(Вт|Ср|Чт|Пт|Сб|Вс))?:\\s*([0-2][0-9]:[0-5][0-9]-[0-2][0-9]:[0-5][0-9])(,\\s*[0-2][0-9]:[0-5][0-9]-[0-2][0-9]:[0-5][0-9])?\\.$";
+    private static final Map<String, DayOfWeek> RUS_DAY_TO_DAY_OF_WEEK_MAP = Map.of("Пн", DayOfWeek.MONDAY, "Вт", DayOfWeek.TUESDAY, "Ср", DayOfWeek.WEDNESDAY, "Чт", DayOfWeek.THURSDAY, "Пт", DayOfWeek.FRIDAY, "Сб", DayOfWeek.SATURDAY, "Вс", DayOfWeek.SUNDAY);
+    private static final Map<DayOfWeek, String> DAY_OF_WEEK_TO_RUS_DAY_MAP = Map.of(DayOfWeek.MONDAY, "Пн", DayOfWeek.TUESDAY, "Вт", DayOfWeek.WEDNESDAY, "Ср", DayOfWeek.THURSDAY, "Чт", DayOfWeek.FRIDAY, "Пт", DayOfWeek.SATURDAY, "Сб", DayOfWeek.SUNDAY, "Вс");
+    private static final Pattern DAY_OR_DAYS_PATTERN = Pattern.compile("(Пн|Вт|Ср|Чт|Пт|Сб|Вс)(-(Вт|Ср|Чт|Пт|Сб|Вс))?");
+    private static final Pattern WORKING_TIME_PATTERN = Pattern.compile("([0-2][0-9]:[0-5][0-9]-[0-2][0-9]:[0-5][0-9])[,|\\.]");
+    private static final Pattern LUNCH_TIME_PATTERN = Pattern.compile("(,\\s*[0-2][0-9]:[0-5][0-9]-[0-2][0-9]:[0-5][0-9])");
 
     private RecyclingPointMapper() {
     }
@@ -65,19 +65,18 @@ public class RecyclingPointMapper {
                 .build();
     }
 
+    /*Приведение данных о времени работы пункта переработки к Map<DayOfWeek, WorkingHours> из вида:
+    Время работы: Пн-Пт: 09:00-17:00, обед: 13:00-14:00; Сб: 09:00-13:00, обед: 12:00-12:30; Вс: выходной*/
     public static Map<DayOfWeek, WorkingHours> workingHoursToMap(String workingHoursAsString) {
-        Map<DayOfWeek, WorkingHours> map = new EnumMap<>(DayOfWeek.class);
-        if (!workingHoursAsString.matches(regExpIncommingString)) {
-            throw new PatternMismatchException("Provided String does not correspond to pattern required");
-        } else {
-            List<String> daysOrRangesOfDaysWithTime = Arrays.asList(workingHoursAsString.split(";"));
+        Map<DayOfWeek, WorkingHours> result = new EnumMap<>(DayOfWeek.class);
+        if (workingHoursAsString.matches(WORKING_HOURS_REGEXP)) {
+            String[] daysOrRangesOfDaysWithTime = workingHoursAsString.split(";");
             String dayOrDays = "";
             String workingTime = "";
-            String lunchTime = "";
             for (String dayOrDaysWithTime : daysOrRangesOfDaysWithTime) {
-                Matcher matcherDayOrDays = dayOrDaysPattern.matcher(dayOrDaysWithTime);
-                Matcher matcherWorkingTime = workingTimePattern.matcher(dayOrDaysWithTime);
-                Matcher matcherLunchTime = lunchTimePattern.matcher(dayOrDaysWithTime);
+                Matcher matcherDayOrDays = DAY_OR_DAYS_PATTERN.matcher(dayOrDaysWithTime);
+                Matcher matcherWorkingTime = WORKING_TIME_PATTERN.matcher(dayOrDaysWithTime);
+                Matcher matcherLunchTime = LUNCH_TIME_PATTERN.matcher(dayOrDaysWithTime);
                 if (matcherDayOrDays.find()) {
                     dayOrDays = matcherDayOrDays.group();
                 }
@@ -90,66 +89,64 @@ public class RecyclingPointMapper {
                 LocalTime lunchStartTime = null;
                 LocalTime lunchEndTime = null;
                 if (matcherLunchTime.find()) {
-                    lunchTime = matcherLunchTime.group();
-                    lunchTime = lunchTime.substring(1).trim();
+                    String lunchTime = matcherLunchTime.group().substring(1).trim();
                     lunchStartTime = LocalTime.parse(lunchTime.subSequence(0, lunchTime.indexOf("-")), DateTimeFormatter.ofPattern("HH:mm"));
                     lunchEndTime = LocalTime.parse(lunchTime.subSequence(lunchTime.indexOf("-") + 1, lunchTime.length()), DateTimeFormatter.ofPattern("HH:mm"));
                 }
                 LocalTime openingTime = LocalTime.parse(workingTime.subSequence(0, workingTime.indexOf("-")).toString(), DateTimeFormatter.ofPattern("HH:mm"));
                 LocalTime closingTime = LocalTime.parse(workingTime.subSequence(workingTime.indexOf("-") + 1, workingTime.indexOf(",")), DateTimeFormatter.ofPattern("HH:mm"));
-                int startDay;
-                int endDay;
+
                 String[] startAndEndDays = dayOrDays.split("-");
-                startDay = dayOfWeekMap.get(startAndEndDays[0]).getValue();
-                endDay = startAndEndDays.length == 2 ? dayOfWeekMap.get(startAndEndDays[1]).getValue() : startDay;
+                int startDay = RUS_DAY_TO_DAY_OF_WEEK_MAP.get(startAndEndDays[0]).getValue();
+                int endDay = startAndEndDays.length == 2 ? RUS_DAY_TO_DAY_OF_WEEK_MAP.get(startAndEndDays[1]).getValue() : startDay;
                 for (int i = startDay; i <= endDay; i++) {
-                    map.put(DayOfWeek.of(i), new WorkingHours(openingTime, closingTime, lunchStartTime, lunchEndTime));
+                    result.put(DayOfWeek.of(i), new WorkingHours(openingTime, closingTime, lunchStartTime, lunchEndTime));
                 }
             }
+        } else {
+            throw new PatternMismatchException("Provided string does not correspond to pattern required");
         }
-        return map;
+        return result;
     }
 
-    public static String workingHoursToString(Map<DayOfWeek, WorkingHours> map) {
-        Map<WorkingHours, ArrayList<DayOfWeek>> reverseMap = map.entrySet()
-                .stream()
-                .collect(Collectors.groupingBy(Map.Entry<DayOfWeek, WorkingHours>::getValue))
-                .values()
-                .stream()
-                .collect(Collectors.toMap(item -> item.get(0).getValue(), item -> new ArrayList<>(item.stream()
-                        .map(Map.Entry::getKey)
-                        .sorted()
-                        .collect(Collectors.toList()))));
+    /*Приведение данных о времени работы пункта переработки к String вида:
+    Время работы: Пн-Пт: 09:00-17:00, обед: 13:00-14:00; Сб: 09:00-13:00, обед: 12:00-12:30; Вс: выходной*/
+    public static String workingHoursToString(Map<DayOfWeek, WorkingHours> workingHoursMap) {
         StringBuilder sb = new StringBuilder();
         sb.append("Время работы: ");
-        for (Map.Entry<WorkingHours, ArrayList<DayOfWeek>> entry : reverseMap.entrySet()) {
-            WorkingHours workingHours = entry.getKey();
-            List<DayOfWeek> days = entry.getValue();
-            for (int i = 0; i < days.size(); i++) {
-                sb.append(dayOfWeekReverseMap.get(days.get(i)));
-                if (i < days.size() - 1) sb.append(",");
-                else sb.append(": ");
+        List<DayOfWeek> weekends = new ArrayList<>();
+        for (int i = 1; i <= 7; i++) {
+            DayOfWeek firstDay = DayOfWeek.of(i);
+            DayOfWeek lastDay = DayOfWeek.of(i);
+            WorkingHours firstDayHours = workingHoursMap.get(DayOfWeek.of(i));
+            if (firstDayHours == null) {
+                weekends.add(firstDay);
+                continue;
             }
-            if (workingHours.getOpeningTime() != null && workingHours.getClosingTime() != null) {
-                sb.append(workingHours.getOpeningTime()).append("-").append(workingHours.getClosingTime());
+            for (int j = i + 1; j <= 8; j++) {
+                if (j == 8 || !firstDayHours.equals(workingHoursMap.get(DayOfWeek.of(j)))) {
+                    lastDay = DayOfWeek.of(j - 1);
+                    i = j - 1;
+                    break;
+                }
             }
-            if (workingHours.getLunchStartTime() != null && workingHours.getLunchEndTime() != null) {
-                sb.append(", обед: ").append(workingHours.getLunchStartTime()).append("-").append(workingHours.getLunchEndTime()).append("; ");
-            } else {
-                sb.append("; ");
+            sb.append(DAY_OF_WEEK_TO_RUS_DAY_MAP.get(firstDay))
+                    .append(lastDay.equals(firstDay) ? "" : "-" + DAY_OF_WEEK_TO_RUS_DAY_MAP.get(lastDay))
+                    .append(": ");
+            if (firstDayHours.getOpeningTime() != null && firstDayHours.getClosingTime() != null) {
+                sb.append(firstDayHours.getOpeningTime()).append("-").append(firstDayHours.getClosingTime());
+                if (firstDayHours.getLunchStartTime() != null && firstDayHours.getLunchEndTime() != null) {
+                    sb.append(", обед: ").append(firstDayHours.getLunchStartTime()).append("-").append(firstDayHours.getLunchEndTime());
+                }
             }
+            sb.append("; ");
         }
-        List<DayOfWeek> nonWorkingDays = Arrays.stream(DayOfWeek.values()).collect(Collectors.toList());
-        List<DayOfWeek> dayOfWeekFromMap = new ArrayList<>(map.keySet());
-        for (DayOfWeek day : dayOfWeekFromMap) {
-            nonWorkingDays.remove(day);
-        }
-        if (!nonWorkingDays.isEmpty()) {
-            for (int i = 0; i <= nonWorkingDays.size() - 1; i++) {
-                sb.append(dayOfWeekReverseMap.get(nonWorkingDays.get(i)));
-                if (i < nonWorkingDays.size() - 1) sb.append(",");
+
+        if (!weekends.isEmpty()) {
+            for (DayOfWeek weekend : weekends) {
+                sb.append(DAY_OF_WEEK_TO_RUS_DAY_MAP.get(weekend)).append(", ");
             }
-            sb.append(": выходной");
+            sb.deleteCharAt(sb.length() - 1).deleteCharAt(sb.length() - 1).append(": выходной");
         }
         return sb.toString();
     }
