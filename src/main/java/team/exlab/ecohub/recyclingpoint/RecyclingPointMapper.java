@@ -104,7 +104,6 @@ public class RecyclingPointMapper {
     Время работы: Пн-Пт: 09:00-17:00, обед: 13:00-14:00; Сб: 09:00-13:00, обед: 12:00-12:30; Вс: выходной*/
     public static String workingHoursToString(Map<DayOfWeek, WorkingHours> workingHoursMap) {
         StringBuilder sb = new StringBuilder();
-        sb.append("Время работы: ");
         List<DayOfWeek> weekends = new ArrayList<>();
         for (int i = 1; i <= 7; i++) {
             DayOfWeek firstDay = DayOfWeek.of(i);

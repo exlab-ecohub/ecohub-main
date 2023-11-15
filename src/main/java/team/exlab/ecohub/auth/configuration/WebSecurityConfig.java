@@ -18,6 +18,7 @@ import org.springframework.security.web.authentication.logout.LogoutHandler;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import team.exlab.ecohub.auth.configuration.jwt.AuthTokenFilter;
+import team.exlab.ecohub.auth.configuration.jwt.JwtExceptionFilter;
 import team.exlab.ecohub.auth.configuration.jwt.UnauthorizedEntryPointJwt;
 
 @Configuration
@@ -28,6 +29,7 @@ public class WebSecurityConfig {
 
     private final UnauthorizedEntryPointJwt unauthorizedHandler;
     private final LogoutHandler logoutHandler;
+    private final JwtExceptionFilter jwtExceptionFilter;
 
     @Bean
     public AuthTokenFilter authenticationJwtTokenFilter() {
@@ -78,6 +80,7 @@ public class WebSecurityConfig {
                 .anyRequest()
                 .permitAll();
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(jwtExceptionFilter, AuthTokenFilter.class);
         http.logout()
                 .logoutUrl("/auth/logout")
                 .addLogoutHandler(logoutHandler)

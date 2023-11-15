@@ -19,9 +19,9 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class RecyclingPointServiceImpl implements RecyclingPointService {
+    private static final String WRONG_RECYCLABLE_TYPES = "Some of above recyclableTypes values are wrong=%s";
     private final RecyclingPointRepository pointRepository;
     private final RecyclableTypeRepository typeRepository;
-    private static final String WRONG_RECYCLABLE_TYPES = "Some of above recyclableTypes values are wrong=%s";
 
     @Override
     @Transactional

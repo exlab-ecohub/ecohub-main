@@ -16,29 +16,30 @@ public enum ERecyclableType {
     RAGS("ветошь"),
     SHOES("обувь");
 
-    private final String rusName;
     private static final Map<String, ERecyclableType> RUS_NAMES_TO_VALUES = new HashMap<>();
 
     static {
-        for (ERecyclableType e : values()){
+        for (ERecyclableType e : values()) {
             RUS_NAMES_TO_VALUES.put(e.rusName, e);
         }
     }
+
+    private final String rusName;
 
     ERecyclableType(String rusName) {
         this.rusName = rusName;
     }
 
-    public String getRusName() {
-        return rusName;
-    }
-
     public static ERecyclableType getTypeByRusName(String rusName) {
-        if (RUS_NAMES_TO_VALUES.containsKey(rusName)){
+        if (RUS_NAMES_TO_VALUES.containsKey(rusName)) {
             return RUS_NAMES_TO_VALUES.get(rusName);
         }
         throw new IllegalArgumentException(
                 String.format("ERecyclableType value with rusName=%s not found", rusName)
         );
+    }
+
+    public String getRusName() {
+        return rusName;
     }
 }

@@ -54,17 +54,12 @@ public class JwtService {
     }
 
     public boolean validateAccessToken(String jwt) {
-        try {
-            return Jwts.parser().setSigningKey(key)
-                    .parseClaimsJws(jwt)
-                    .getBody()
-                    .getExpiration()
-                    .after(new Date()) &&
-                    getPurposeFromJwt(jwt).equals(TokenPurpose.ACCESS.name());
-        } catch (MalformedJwtException | IllegalArgumentException e) {
-            log.warn("Exception while validating access token", e);
-        }
-        return false;
+        return Jwts.parser().setSigningKey(key)
+                .parseClaimsJws(jwt)
+                .getBody()
+                .getExpiration()
+                .after(new Date()) &&
+                getPurposeFromJwt(jwt).equals(TokenPurpose.ACCESS.name());
     }
 
     public boolean validateRefreshToken(String jwt) {

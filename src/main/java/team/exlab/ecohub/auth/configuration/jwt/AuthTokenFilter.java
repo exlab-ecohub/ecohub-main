@@ -39,6 +39,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
             }
         } catch (Exception e) {
             log.warn("Exception in authorization token filter", e);
+            throw e;
         }
         filterChain.doFilter(request, response);
     }
