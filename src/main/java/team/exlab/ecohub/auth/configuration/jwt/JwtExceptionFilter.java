@@ -5,7 +5,6 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -16,7 +15,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-@Component
 @Slf4j
 public class JwtExceptionFilter extends OncePerRequestFilter {
     @Override
@@ -25,22 +23,26 @@ public class JwtExceptionFilter extends OncePerRequestFilter {
         try {
             filterchain.doFilter(request, response);
         } catch (JwtException ex) {
-            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            writeExceptionResponse(request, response, ex, ex instanceof ExpiredJwtException ? "JWT expired" : "JWT problem");
+        }
+    }
 
-            final Map<String, Object> body = new HashMap<>();
-            body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
-            body.put("error", ex instanceof ExpiredJwtException ? "JWT expired" : "JWT problem");
-            body.put("message", ex.getMessage());
-            body.put("path", request.getServletPath());
-            response.addHeader("WWW-Authenticate", "Bearer realm=\"ecohub\"");
+    public static void writeExceptionResponse(HttpServletRequest request, HttpServletResponse response, Exception ex, String errorMessage) {
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
-            final ObjectMapper mapper = new ObjectMapper();
-            try {
-                mapper.writeValue(response.getOutputStream(), body);
-            } catch (IOException e) {
-                log.warn("Error while writing JWT problem status", e);
-            }
+        final Map<String, Object> body = new HashMap<>();
+        body.put("status", HttpServletResponse.SC_UNAUTHORIZED);
+        body.put("error", errorMessage);
+        body.put("message", ex.getMessage());
+        body.put("path", request.getServletPath());
+        response.addHeader("WWW-Authenticate", "Bearer realm=\"ecohub\"");
+
+        final ObjectMapper mapper = new ObjectMapper();
+        try {
+            mapper.writeValue(response.getOutputStream(), body);
+        } catch (IOException e) {
+            log.warn("Error while writing exception problem status", e);
         }
     }
 }

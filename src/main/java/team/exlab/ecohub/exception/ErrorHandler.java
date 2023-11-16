@@ -39,7 +39,7 @@ public class ErrorHandler {
         );
     }
 
-    @ExceptionHandler({AuthenticationException.class, AdminBlockedException.class, JwtTokenException.class,
+    @ExceptionHandler({AuthenticationException.class, AdminBlockedException.class,
             JwtException.class, SignatureException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleBadCredentialsExceptions(final RuntimeException e) {
