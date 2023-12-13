@@ -6,10 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import team.exlab.ecohub.recyclingpoint.model.Location;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.util.Set;
 
 @Getter
@@ -21,16 +18,27 @@ public class RecyclingPointDto {
     private Long id;
     @NotBlank
     @Size(min = 3, max = 100, message = "Name must be between 3 and 100 characters long")
+    @Pattern(regexp = "^[0-9a-zA-Zа-яА-Я-/:,()№.\"\\s]{3,100}$",
+            message = "Name must meet requirements")
     private String name;
     @NotBlank
     @Size(min = 3, max = 100, message = "Address must be between 3 and 100 characters long")
+    @Pattern(regexp = "^[0-9a-zA-Zа-яА-Я-/:,№().\"\\s]{3,100}$",
+            message = "Address must meet requirements")
     private String address;
     @Size(min = 4, max = 100, message = "Phone number must be between 4 and 100 characters long")
+    @Pattern(regexp = "^[0-9-()+\\s]{4,100}$",
+            message = "Phone number must meet requirements")
     private String phoneNumber;
-    @Size(min = 4, max = 100, message = "Website must be between 4 and 100 characters long")
+    @Size(min = 4, max = 50, message = "Website must be between 4 and 100 characters long")
+    @Pattern(regexp = "^[0-9a-zA-Zа-яА-Я-/:.]{4,50}$",
+            message = "Website must meet requirements")
     private String website;
     @NotNull(message = "GPS coordinates required")
     private Location location;
+    @Size(max = 300, message = "Working hours must be less than 300 characters long")
+    @Pattern(regexp = "^[0-9а-яА-Я-/:,;().\\s]{0,300}$",
+            message = "Working hours must meet requirements")
     private String workingHours;
     @NotEmpty(message = "At least one recyclable type required")
     private Set<String> recyclableTypes;
