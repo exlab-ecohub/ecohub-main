@@ -35,7 +35,11 @@ public class RecyclingPointServiceImpl implements RecyclingPointService {
     private List<RecyclingPoint> getRawPoints(Set<String> types, String displayed, Integer from, Integer size) {
         List<RecyclingPoint> recyclingPoints;
         from = from >= 1 ? from - 1 : from;
-        size = size == 0 ? (int) pointRepository.count() - from : size;
+        if (size == 0 && pointRepository.count() > from) {
+            size = (int) pointRepository.count() - from;
+        } else if (size == 0 && pointRepository.count() - 1 < from) {
+            size = 1;
+        }
         if (types == null || types.isEmpty()) {
             if (displayed.equals("null")) {
                 recyclingPoints = pointRepository.findAllByOrderById(OffsetLimitPageable.of(from, size));
