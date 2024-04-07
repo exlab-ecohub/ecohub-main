@@ -1,13 +1,14 @@
 package team.exlab.ecohub.news.dto;
 
 import lombok.*;
+import org.hibernate.validator.constraints.URL;
 import team.exlab.ecohub.news.model.Attachment;
 import team.exlab.ecohub.news.model.ENewsItemType;
+import team.exlab.ecohub.news.validation.ContainersNumber;
 
-import javax.persistence.*;
-import java.time.LocalDateTime;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Size;
 import java.util.Set;
-
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,12 +16,22 @@ import java.util.Set;
 @Getter
 @Builder
 public class NewsItemDto {
-    private String header;
-    private String text;
-    private LocalDateTime publicationDate;
-    private Set<Attachment> imageAttachment;
-    private String linkToSource;
-    private Set<String> keywords;
-    private ENewsItemType type;
-    private boolean displayed;
+	@NotEmpty(message = "field must not be empty")
+	@Size(max = 100, message = "should be less than 100 characters")
+	private String header;
+	@NotEmpty(message = "field must not be empty")
+	@Size(max = 15000, message = "should be less than 15000 characters")
+	private String text;
+	private String publicationDate;
+	@NotEmpty(message = "field must not be empty")
+	private Set<Attachment> imageAttachment;
+	@URL(regexp = "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)", message = "Not valid URL!")
+	private String linkToSource;
+	@NotEmpty(message = "field must not be empty")
+	@ContainersNumber
+	private Set<String> keywords;
+	@NotEmpty(message = "field must not be empty")
+	private ENewsItemType type;
+	@NotEmpty(message = "field must not be empty")
+	private boolean displayed;
 }

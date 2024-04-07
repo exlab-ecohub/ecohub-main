@@ -7,5 +7,5 @@ import lombok.Setter;
 @Getter
 @Setter
 public class StorageConfigurationProperties {
-    private String imagesDirectory;
+	private String imagesDirectory;
 }

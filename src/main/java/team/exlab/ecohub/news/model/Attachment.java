@@ -3,7 +3,7 @@ package team.exlab.ecohub.news.model;
 import lombok.*;
 
 import javax.persistence.*;
-import java.util.Set;
+import java.net.URL;
 
 @Entity
 @NoArgsConstructor
@@ -13,10 +13,10 @@ import java.util.Set;
 @Table(name = "attachments")
 @Builder
 public class Attachment {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    private String title;
-    private String extension;
-    private String attachmentPath;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+	private String title;
+	private String extension;
+	private URL attachmentPath;
 }
