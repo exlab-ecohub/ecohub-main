@@ -18,7 +18,7 @@ public class ImageFileValidator implements ConstraintValidator<ValidImage, Multi
 			context.disableDefaultConstraintViolation();
 			context.buildConstraintViolationWithTemplate("Only PNG, JPG, JPEG and GIF images are allowed.").addConstraintViolation();
 			result = false;
-		} else if (!isSupportedDimensions(multipartFile)) {
+		} else if (!isSupportedResolutions(multipartFile)) {
 			context.disableDefaultConstraintViolation();
 			context.buildConstraintViolationWithTemplate("Provided image width/height is out of aloud range!").addConstraintViolation();
 			result = false;
@@ -29,11 +29,11 @@ public class ImageFileValidator implements ConstraintValidator<ValidImage, Multi
 	private boolean isSupportedContentType(MultipartFile multipartFile) {
 		String contentType = multipartFile.getContentType();
 		if (contentType != null) {
-			return contentType.equals("image/png") || contentType.equals("multipartFile/jpg") || contentType.equals("image/jpeg") || contentType.equals("image/gif");
+			return  contentType.equals("image/png") || contentType.equals("multipartFile/jpg") || contentType.equals("image/jpeg") || contentType.equals("image/gif");
 		} else return true;
 	}
 
-	private boolean isSupportedDimensions(MultipartFile multipartFile) {
+	private boolean isSupportedResolutions(MultipartFile multipartFile) {
 		if (!multipartFile.isEmpty()) {
 			try (InputStream is = multipartFile.getInputStream()) {
 				BufferedImage image = ImageIO.read(is);

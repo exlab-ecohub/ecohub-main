@@ -100,6 +100,18 @@ public class NewsItemServiceImpl implements NewsItemService {
 		}
 	}
 
+	@Override
+	public Collection<String> getKeywordsBySubstring(String keywordSubstring) {
+		return newsItemRepository.findAll().stream().map(NewsItem::getKeywords).flatMap(Collection::stream)
+				.filter(s -> s.contains(keywordSubstring)).collect(Collectors.toSet());
+	}
+
+	@Override
+	public Collection<NewsItemDto> getAllNewsWithSpecifiedKeywords(String[] keywords) {
+		return newsItemRepository.findAll().stream().filter(n -> !Collections.disjoint(n.getKeywords(), Set.of(keywords)))
+				.map(NewsItemMapper::toDto).collect(Collectors.toList());
+	}
+
 	private Attachment saveImage(MultipartFile imageAttachment) {
 		if (!imageAttachment.isEmpty()) {
 			Path uploadPath = Paths.get(System.getProperty(storageProperties.getImagesDirectory()), "files", "news", "images");
