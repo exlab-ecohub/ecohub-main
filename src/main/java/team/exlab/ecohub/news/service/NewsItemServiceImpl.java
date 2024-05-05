@@ -3,6 +3,7 @@ package team.exlab.ecohub.news.service;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -10,13 +11,14 @@ import team.exlab.ecohub.exception.AttachmentUploadException;
 import team.exlab.ecohub.exception.NewsItemNotFoundException;
 import team.exlab.ecohub.exception.UnableCreateDirectoryException;
 import team.exlab.ecohub.exception.UnablePassInputStreamToByteArray;
-import team.exlab.ecohub.news.StorageConfigurationProperties;
 import team.exlab.ecohub.news.dto.NewsItemDto;
 import team.exlab.ecohub.news.dto.NewsItemMapper;
 import team.exlab.ecohub.news.model.Attachment;
+import team.exlab.ecohub.news.model.ENewsItemType;
 import team.exlab.ecohub.news.model.NewsItem;
 import team.exlab.ecohub.news.repository.AttachmentRepository;
 import team.exlab.ecohub.news.repository.NewsItemRepository;
+import team.exlab.ecohub.pageable.OffsetLimitPageable;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,7 +35,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class NewsItemServiceImpl implements NewsItemService {
-	private final StorageConfigurationProperties storageProperties;
+	private final Environment environment;
 	private final NewsItemRepository newsItemRepository;
 	private final AttachmentRepository attachmentRepository;
 
@@ -49,10 +51,10 @@ public class NewsItemServiceImpl implements NewsItemService {
 				.type(newsItemDto.getType())
 				.displayed(true)
 				.build();
-		Attachment attachment = saveImage(imageAttachment);
-		if (attachment != null) {
-			attachmentRepository.save(attachment);
-			newsItemToSave.setImageAttachment(Collections.singleton(attachment));
+		Optional<Attachment> attachment = saveImage(imageAttachment);
+		if (attachment.isPresent()) {
+			attachmentRepository.save(attachment.get());
+			newsItemToSave.setImageAttachment(Collections.singleton(attachment.get()));
 		}
 		return NewsItemMapper.toDto(newsItemRepository.save(newsItemToSave));
 	}
@@ -61,12 +63,12 @@ public class NewsItemServiceImpl implements NewsItemService {
 	@Transactional
 	public NewsItemDto editNewsItem(Long newsId, NewsItemDto newsItemDto, MultipartFile attachment) {
 		NewsItem newsItemToEdit = newsItemRepository.findById(newsId).orElseThrow(() -> new NewsItemNotFoundException(newsId));
-		deleteImage(newsItemToEdit.getImageAttachment());
 		Set<Attachment> set = new HashSet<>();
-		Attachment newAttachment = saveImage(attachment);
-		if (newAttachment != null) {
-			set.add(newAttachment);
-			attachmentRepository.save(newAttachment);
+		if (!attachment.isEmpty()) {
+			deleteImage(newsItemToEdit.getImageAttachment());
+			Optional<Attachment> newAttachment = saveImage(attachment);
+			set.add(newAttachment.get());
+			attachmentRepository.save(newAttachment.get());
 			newsItemToEdit.setImageAttachment(set);
 		}
 		newsItemToEdit.setHeader(newsItemDto.getHeader());
@@ -80,8 +82,22 @@ public class NewsItemServiceImpl implements NewsItemService {
 
 	@Override
 	@Transactional
-	public List<NewsItemDto> getAllNews() {
-		return newsItemRepository.findAll().stream().map(NewsItemMapper::toDto).collect(Collectors.toList());
+	public List<NewsItemDto> getAllNews(Integer from, Integer size, Boolean displayed, ENewsItemType type) {
+		List<NewsItemDto> newsItemDtos;
+		from = from >= 1 ? from - 1 : from;
+		if (size == 0 && newsItemRepository.count() > from) {
+			size = (int) newsItemRepository.count() - from;
+		} else if (size == 0 && newsItemRepository.count() <= from) {
+			size = 1;
+		}
+		if (displayed) {
+			newsItemDtos = newsItemRepository.findAllByDisplayedAndTypeOrderById(OffsetLimitPageable.of(from, size), true, type).stream()
+					.map(NewsItemMapper::toDto).collect(Collectors.toList());
+		} else {
+			newsItemDtos = newsItemRepository.findAllByTypeOrderById(OffsetLimitPageable.of(from, size), type).stream()
+					.map(NewsItemMapper::toDto).collect(Collectors.toList());
+		}
+		return newsItemDtos;
 	}
 
 	@Override
@@ -112,9 +128,9 @@ public class NewsItemServiceImpl implements NewsItemService {
 				.map(NewsItemMapper::toDto).collect(Collectors.toList());
 	}
 
-	private Attachment saveImage(MultipartFile imageAttachment) {
+	private Optional<Attachment> saveImage(MultipartFile imageAttachment) {
 		if (!imageAttachment.isEmpty()) {
-			Path uploadPath = Paths.get(System.getProperty(storageProperties.getImagesDirectory()), "files", "news", "images");
+			Path uploadPath = Paths.get(Objects.requireNonNull(environment.getProperty("resources.images-directory")), "files", "news", "images");
 			if (!Files.exists(uploadPath)) {
 				try {
 					Files.createDirectories(uploadPath);
@@ -122,17 +138,16 @@ public class NewsItemServiceImpl implements NewsItemService {
 					throw new UnableCreateDirectoryException("Fail to create directory: " + uploadPath);
 				}
 			}
-			String fileName = "image_" + UUID.randomUUID() + "_" + imageAttachment.getOriginalFilename();
+			String fileName = "image_" + imageAttachment.getOriginalFilename() + "_" + UUID.randomUUID();
 			Path filePath = Paths.get(uploadPath.toString(), fileName);
 			try (InputStream imageInputStream = imageAttachment.getInputStream()) {
 				Files.copy(imageInputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
-				return Attachment.builder().title(fileName).extension(FilenameUtils.getExtension(fileName)).attachmentPath(filePath.toUri().toURL()).build();
+				return Optional.of(Attachment.builder().title(fileName).extension(FilenameUtils.getExtension(fileName)).attachmentPath(filePath.toUri().toURL()).build());
 			} catch (IOException e) {
 				throw new AttachmentUploadException("Fail to getInputStream or saving to a file " + filePath);
 			}
-		} else {
-			return null;
 		}
+		return Optional.empty();
 	}
 
 	private boolean deleteImage(Set<Attachment> imageAttachments) {

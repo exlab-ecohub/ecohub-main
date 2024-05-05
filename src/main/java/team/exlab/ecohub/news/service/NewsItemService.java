@@ -3,6 +3,7 @@ package team.exlab.ecohub.news.service;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import team.exlab.ecohub.news.dto.NewsItemDto;
+import team.exlab.ecohub.news.model.ENewsItemType;
 
 import java.util.Collection;
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.List;
 public interface NewsItemService {
     NewsItemDto addNewsItem(NewsItemDto newsItemDto, MultipartFile attachment);
     NewsItemDto editNewsItem(Long newsId, NewsItemDto newsItemDto, MultipartFile attachment);
-    List<NewsItemDto> getAllNews();
+    List<NewsItemDto> getAllNews(Integer from, Integer size, Boolean displayed, ENewsItemType type);
     NewsItemDto getNewsItem(Long newsId);
     byte[] getAttachment(String attachmentURI);
 

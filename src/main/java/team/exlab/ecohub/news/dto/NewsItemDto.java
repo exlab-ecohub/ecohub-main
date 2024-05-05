@@ -8,6 +8,7 @@ import team.exlab.ecohub.news.validation.ContainersNumber;
 
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @AllArgsConstructor
@@ -22,7 +23,7 @@ public class NewsItemDto {
 	@NotEmpty(message = "field must not be empty")
 	@Size(max = 15000, message = "should be less than 15000 characters")
 	private String text;
-	private String publicationDate;
+	private LocalDateTime publicationDate;
 	@NotEmpty(message = "field must not be empty")
 	private Set<Attachment> imageAttachment;
 	@URL(regexp = "https?:\\/\\/(www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b([-a-zA-Z0-9()@:%_\\+.~#?&//=]*)", message = "Not valid URL!")
