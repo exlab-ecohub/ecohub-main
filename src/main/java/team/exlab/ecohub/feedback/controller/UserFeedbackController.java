@@ -1,11 +1,11 @@
 package team.exlab.ecohub.feedback.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import team.exlab.ecohub.feedback.dto.FeedbackDto;
 import team.exlab.ecohub.feedback.service.FeedbackService;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @RestController

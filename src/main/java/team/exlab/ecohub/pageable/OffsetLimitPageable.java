@@ -1,9 +1,9 @@
 package team.exlab.ecohub.pageable;
 
+import jakarta.validation.ValidationException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-import javax.validation.ValidationException;
 import java.util.Optional;
 
 public class OffsetLimitPageable implements Pageable {

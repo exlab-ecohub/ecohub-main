@@ -1,9 +1,8 @@
 package team.exlab.ecohub.news.validation;
 
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 import team.exlab.ecohub.news.dto.NewsItemDto;
-
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
 
 public class ContainersNumberValidator implements ConstraintValidator<ContainersNumber, NewsItemDto> {
 	@Override

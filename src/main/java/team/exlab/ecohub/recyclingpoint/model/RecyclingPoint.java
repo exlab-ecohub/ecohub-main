@@ -1,8 +1,8 @@
 package team.exlab.ecohub.recyclingpoint.model;
 
+import jakarta.persistence.*;
 import lombok.*;
 
-import javax.persistence.*;
 import java.time.DayOfWeek;
 import java.util.Map;
 import java.util.Set;

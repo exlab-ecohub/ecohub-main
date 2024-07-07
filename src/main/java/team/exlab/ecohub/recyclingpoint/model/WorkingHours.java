@@ -1,10 +1,10 @@
 package team.exlab.ecohub.recyclingpoint.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.persistence.Embeddable;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.persistence.Embeddable;
 import java.time.LocalTime;
 
 @Getter

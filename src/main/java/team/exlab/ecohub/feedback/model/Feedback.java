@@ -1,10 +1,10 @@
 package team.exlab.ecohub.feedback.model;
 
+import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 import team.exlab.ecohub.user.model.User;
 
-import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity

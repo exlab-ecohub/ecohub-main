@@ -1,10 +1,9 @@
 package team.exlab.ecohub.token;
 
 
+import jakarta.persistence.*;
 import lombok.*;
 import team.exlab.ecohub.user.model.User;
-
-import javax.persistence.*;
 
 @Setter
 @Getter

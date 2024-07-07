@@ -1,5 +1,7 @@
 package team.exlab.ecohub.auth.configuration;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -11,9 +13,6 @@ import team.exlab.ecohub.exception.UserNotFoundException;
 import team.exlab.ecohub.token.TokenService;
 import team.exlab.ecohub.user.model.User;
 import team.exlab.ecohub.user.repository.UserRepository;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import static team.exlab.ecohub.auth.configuration.jwt.JwtExceptionFilter.writeExceptionResponse;
 

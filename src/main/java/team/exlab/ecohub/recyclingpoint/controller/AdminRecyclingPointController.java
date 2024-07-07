@@ -1,11 +1,10 @@
 package team.exlab.ecohub.recyclingpoint.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import team.exlab.ecohub.recyclingpoint.RecyclingPointService;
 import team.exlab.ecohub.recyclingpoint.dto.RecyclingPointDto;
-
-import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/admin/recycling-points")

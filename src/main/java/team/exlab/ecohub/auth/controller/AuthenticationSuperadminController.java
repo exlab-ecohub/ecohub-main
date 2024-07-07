@@ -1,5 +1,6 @@
 package team.exlab.ecohub.auth.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,7 +11,6 @@ import team.exlab.ecohub.user.dto.AdminDto;
 import team.exlab.ecohub.user.dto.PasswordChangeDto;
 import team.exlab.ecohub.user.service.UserService;
 
-import javax.validation.Valid;
 import java.util.List;
 
 

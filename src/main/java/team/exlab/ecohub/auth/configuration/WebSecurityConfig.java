@@ -71,13 +71,12 @@ public class WebSecurityConfig {
                         channel.anyRequest().requiresSecure())
                 .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-                .requestMatchers()
-                .antMatchers("/auth/**")
-                .antMatchers("/recycling-points/**")
-                .antMatchers("/feedbacks/**")
-                .antMatchers("/swagger/**")
-                .antMatchers("/swagger-ui/**")
-                .antMatchers("/swagger-download/**");
+                .securityMatchers()
+                .requestMatchers("/auth/**")
+                .requestMatchers("/recycling-points/**")
+                .requestMatchers("/feedbacks/**")
+                .requestMatchers("/swagger-ui/**")
+                .requestMatchers("/v3/**");
         http.logout()
                 .logoutUrl("/auth/logout")
                 .addLogoutHandler(logoutHandler)
@@ -95,9 +94,9 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests()
 //                .antMatchers("/admin/**")
 //                .hasAnyRole("ADMIN", "SUPERADMIN")
-                .antMatchers("/superadmin/**")
+                .requestMatchers("/superadmin/**")
                 .hasRole("SUPERADMIN")
-                .antMatchers("/user/**")
+                .requestMatchers("/user/**")
                 .hasRole("USER");
         http.addFilterBefore(new AuthTokenFilter(context.getBean(JwtService.class), context.getBean(UserServiceImpl.class)),
                 UsernamePasswordAuthenticationFilter.class);

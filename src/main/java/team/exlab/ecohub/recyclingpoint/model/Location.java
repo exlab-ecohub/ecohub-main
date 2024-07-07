@@ -1,12 +1,11 @@
 package team.exlab.ecohub.recyclingpoint.model;
 
+import jakarta.persistence.Embeddable;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import javax.persistence.Embeddable;
-import javax.validation.constraints.NotNull;
 
 @Embeddable
 @Getter

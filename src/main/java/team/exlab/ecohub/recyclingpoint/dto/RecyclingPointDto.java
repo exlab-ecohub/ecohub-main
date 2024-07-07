@@ -1,19 +1,18 @@
 package team.exlab.ecohub.recyclingpoint.dto;
 
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import team.exlab.ecohub.recyclingpoint.model.Location;
 
-import javax.validation.constraints.*;
 import java.util.Set;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @Builder
-
 public class RecyclingPointDto {
     private Long id;
     @NotBlank

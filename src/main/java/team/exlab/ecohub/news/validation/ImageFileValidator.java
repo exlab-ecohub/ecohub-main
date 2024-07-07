@@ -1,10 +1,10 @@
 package team.exlab.ecohub.news.validation;
 
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;

@@ -1,13 +1,13 @@
 package team.exlab.ecohub.news.dto;
 
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import org.hibernate.validator.constraints.URL;
 import team.exlab.ecohub.news.model.Attachment;
 import team.exlab.ecohub.news.model.ENewsItemType;
 import team.exlab.ecohub.news.validation.ContainersNumber;
 
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.Set;
 
