@@ -5,5 +5,5 @@ import org.springframework.stereotype.Repository;
 import team.exlab.ecohub.news.model.Attachment;
 
 @Repository
-public interface AttachmentRepository extends JpaRepository<Attachment, Long> {
+public interface AttachmentsRepository extends JpaRepository<Attachment, Long> {
 }

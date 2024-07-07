@@ -3,7 +3,6 @@ package team.exlab.ecohub.news.model;
 import lombok.*;
 
 import javax.persistence.*;
-import java.net.URL;
 
 @Entity
 @NoArgsConstructor
@@ -16,7 +15,7 @@ public class Attachment {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	private String title;
+	private String name;
 	private String extension;
-	private URL attachmentPath;
+	private String fullName;
 }

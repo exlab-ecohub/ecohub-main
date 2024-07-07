@@ -3,10 +3,9 @@ package team.exlab.ecohub.news.service;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
-import org.springframework.data.jpa.provider.HibernateUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,16 +18,14 @@ import team.exlab.ecohub.news.dto.NewsItemMapper;
 import team.exlab.ecohub.news.model.Attachment;
 import team.exlab.ecohub.news.model.ENewsItemType;
 import team.exlab.ecohub.news.model.NewsItem;
-import team.exlab.ecohub.news.repository.AttachmentRepository;
+import team.exlab.ecohub.news.repository.AttachmentsRepository;
 import team.exlab.ecohub.news.repository.NewsItemRepository;
 import team.exlab.ecohub.pageable.OffsetLimitPageable;
 
-import javax.persistence.EntityManager;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -40,9 +37,11 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class NewsItemServiceImpl implements NewsItemService {
+    @Value("${resources.images-directory}")
+    private String imagesDirectory;
     private final Environment environment;
     private final NewsItemRepository newsItemRepository;
-    private final AttachmentRepository attachmentRepository;
+    private final AttachmentsRepository attachmentsRepository;
 
     @Override
     @Transactional
@@ -58,7 +57,7 @@ public class NewsItemServiceImpl implements NewsItemService {
                 .build();
         Optional<Attachment> attachment = saveImage(imageAttachment);
         if (attachment.isPresent()) {
-            attachmentRepository.save(attachment.get());
+            attachmentsRepository.save(attachment.get());
             newsItemToSave.setImageAttachment(Collections.singleton(attachment.get()));
         }
         return NewsItemMapper.toDto(newsItemRepository.save(newsItemToSave));
@@ -73,7 +72,7 @@ public class NewsItemServiceImpl implements NewsItemService {
             deleteImage(newsItemToEdit.getImageAttachment());
             Optional<Attachment> newAttachment = saveImage(attachment);
             set.add(newAttachment.get());
-            attachmentRepository.save(newAttachment.get());
+            attachmentsRepository.save(newAttachment.get());
             newsItemToEdit.setImageAttachment(set);
         }
         newsItemToEdit.setHeader(newsItemDto.getHeader());
@@ -113,16 +112,11 @@ public class NewsItemServiceImpl implements NewsItemService {
 
     @Override
     @Transactional
-    public byte[] getAttachment(String attachmentURL) {
-//        Path uploadPath = Paths.get(Objects.requireNonNull(environment.getProperty("resources.images-directory")), "files", "news", "images");
-//        Path filePath = Paths.get(uploadPath.toString(), attachmentURL);
-//
-//        try (InputStream is = new FileInputStream(filePath.toUri().toURL().toString().split(":", 2)[1].replace("%20", " "))) {
-//        try (InputStream is = new FileInputStream(attachmentURL)) {
-        try (InputStream is = new FileInputStream(attachmentURL.replace("%20", " "))) {
+    public byte[] getAttachment(String fileName) {
+        try (InputStream is = new FileInputStream(imagesDirectory + "/" + fileName)) {
             return IOUtils.toByteArray(is);
         } catch (IOException e) {
-            throw new UnablePassInputStreamToByteArray(attachmentURL);
+            throw new UnablePassInputStreamToByteArray(fileName);
         }
     }
 
@@ -140,7 +134,7 @@ public class NewsItemServiceImpl implements NewsItemService {
 
     private Optional<Attachment> saveImage(MultipartFile imageAttachment) {
         if (!imageAttachment.isEmpty()) {
-            Path uploadPath = Paths.get(Objects.requireNonNull(environment.getProperty("resources.images-directory")), "files", "news", "images");
+            Path uploadPath = Paths.get(Objects.requireNonNull(environment.getProperty("resources.images-directory")));
             if (!Files.exists(uploadPath)) {
                 try {
                     Files.createDirectories(uploadPath);
@@ -150,15 +144,12 @@ public class NewsItemServiceImpl implements NewsItemService {
             }
             String[] dotSeparatedFileName = imageAttachment.getOriginalFilename().split("\\.");
             String fileNameWithoutFormat = String.join("", Arrays.copyOfRange(dotSeparatedFileName, 0, dotSeparatedFileName.length - 1));
-            String fileName = "image_" + fileNameWithoutFormat + "_" + UUID.randomUUID() + "." + dotSeparatedFileName[dotSeparatedFileName.length - 1];
+            String fileName = "img_" + fileNameWithoutFormat + "_" + RandomStringUtils.randomAlphanumeric(8) + "." + dotSeparatedFileName[dotSeparatedFileName.length - 1];
 
-//            Path filePath = Paths.get(uploadPath.toString(), fileName);
             Path filePath = Paths.get(uploadPath.toString(), fileName);
             try (InputStream imageInputStream = imageAttachment.getInputStream()) {
-                URL url = new URL("https://localhost:8081/images/" + fileName);
                 Files.copy(imageInputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
-                return Optional.of(Attachment.builder().title(fileName).extension(FilenameUtils.getExtension(fileName)).attachmentPath(filePath.toUri().toURL()).build());
-//                return Optional.of(Attachment.builder().title(fileName).extension(FilenameUtils.getExtension(fileName)).attachmentPath(url).build());
+                return Optional.of(Attachment.builder().name(fileNameWithoutFormat).extension(FilenameUtils.getExtension(fileName)).fullName(fileName).build());
             } catch (IOException e) {
                 throw new AttachmentUploadException("Fail to getInputStream or saving to a file " + filePath);
             }
@@ -168,8 +159,8 @@ public class NewsItemServiceImpl implements NewsItemService {
 
     private boolean deleteImage(Set<Attachment> imageAttachments) {
         Attachment attachmentForRemoval = imageAttachments.iterator().next();
-        attachmentRepository.delete(attachmentForRemoval);
-        File file = new File(attachmentForRemoval.getAttachmentPath().getPath());
+        attachmentsRepository.delete(attachmentForRemoval);
+        File file = new File(imagesDirectory + "/" + attachmentForRemoval.getFullName());
         return file.delete();
     }
 }
