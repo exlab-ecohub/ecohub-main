@@ -123,12 +123,20 @@ public class NewsItemServiceImpl implements NewsItemService {
     @Override
     public Collection<String> getKeywordsBySubstring(String keywordSubstring) {
         return newsItemRepository.findAll().stream().map(NewsItem::getKeywords).flatMap(Collection::stream)
-                .filter(s -> s.contains(keywordSubstring)).collect(Collectors.toSet());
+                .filter(s -> s.toLowerCase().contains(keywordSubstring.toLowerCase())).collect(Collectors.toSet());
     }
 
     @Override
     public Collection<NewsItemDto> getAllNewsWithSpecifiedKeywords(String[] keywords) {
-        return newsItemRepository.findAll().stream().filter(n -> !Collections.disjoint(n.getKeywords(), Set.of(keywords)))
+        return newsItemRepository.findAll().stream()
+                .filter(n -> !Collections.disjoint(
+                        n.getKeywords().stream()
+                                .map(String::toLowerCase)
+                                .collect(Collectors.toSet()),
+                        Arrays.stream(keywords)
+                                .map(String::toLowerCase)
+                                .collect(Collectors.toSet())
+                ))
                 .map(NewsItemMapper::toDto).collect(Collectors.toList());
     }
 

@@ -4,12 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -64,47 +64,65 @@ public class WebSecurityConfig {
     }
 
     @Bean
-    @Order(Ordered.HIGHEST_PRECEDENCE)
+    @Order(1)
     protected SecurityFilterChain defaultSecurity(HttpSecurity http) throws Exception {
-        http.cors().and().csrf().disable()
+        http
+//                .cors().and()
+                .csrf(AbstractHttpConfigurer::disable)
                 .requiresChannel(channel ->
                         channel.anyRequest().requiresSecure())
-                .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-                .securityMatchers()
-                .requestMatchers("/auth/**")
-                .requestMatchers("/recycling-points/**")
-                .requestMatchers("/feedbacks/**")
-                .requestMatchers("/swagger-ui/**")
-                .requestMatchers("/v3/**");
-        http.logout()
+                .exceptionHandling(auth -> auth.authenticationEntryPoint(unauthorizedHandler))
+                .sessionManagement(sessionManagementCustomizer -> sessionManagementCustomizer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .securityMatchers(authorize -> authorize.requestMatchers(
+                        "/auth/**",
+                        "/recycling-points/**",
+                        "/feedbacks/**",
+                        "/search/news/**",
+                        "/swagger-ui/**",
+                        "/images/**",
+                        "/v3/**")
+                )
+                .authorizeHttpRequests(authorize -> authorize.anyRequest().permitAll()
+                );
+        http.logout(logoutCustomizer -> logoutCustomizer
                 .logoutUrl("/auth/logout")
                 .addLogoutHandler(logoutHandler)
-                .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext());
+                .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext())
+        );
         return http.build();
     }
 
     @Bean
+    @Order(2)
     protected SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.cors().and().csrf().disable()
+        http
+//                .cors().and()
+                .csrf(AbstractHttpConfigurer::disable)
                 .requiresChannel(channel ->
                         channel.anyRequest().requiresSecure())
-                .exceptionHandling().authenticationEntryPoint(unauthorizedHandler).and()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
-                .authorizeHttpRequests()
-//                .antMatchers("/admin/**")
-//                .hasAnyRole("ADMIN", "SUPERADMIN")
-                .requestMatchers("/superadmin/**")
-                .hasRole("SUPERADMIN")
-                .requestMatchers("/user/**")
-                .hasRole("USER");
+                .exceptionHandling(auth -> auth.authenticationEntryPoint(unauthorizedHandler))
+                .sessionManagement(sessionManagementCustomizer -> sessionManagementCustomizer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .securityMatchers(authorize -> authorize
+                        .requestMatchers("/admin/**"
+                                ,"/superadmin/**"
+                                ,"/user/**")
+                )
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/admin/**")
+                        .hasAnyRole("ADMIN", "SUPERADMIN")
+                        .requestMatchers("/superadmin/**")
+                        .hasRole("SUPERADMIN")
+                        .requestMatchers("/user/**")
+                        .hasRole("USER")
+                );
         http.addFilterBefore(new AuthTokenFilter(context.getBean(JwtService.class), context.getBean(UserServiceImpl.class)),
                 UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(new JwtExceptionFilter(), AuthTokenFilter.class);
-        http.logout()
+        http.logout(logoutCustomizer -> logoutCustomizer
                 .logoutUrl("/auth/logout")
                 .addLogoutHandler(logoutHandler)
-                .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext());
+                .logoutSuccessHandler((request, response, authentication) -> SecurityContextHolder.clearContext())
+        );
         return http.build();
     }
 }
